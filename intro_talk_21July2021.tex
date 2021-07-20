@@ -1,0 +1,424 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{sii}
+
+\usepackage{stmaryrd}
+\usepackage[theorems]{tcolorbox}
+\newtcbtheorem[use counter=theorem]{siitheorem}%
+  {Theorem}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{theorem}
+
+\newtcbtheorem[use counter=theorem]{siiproposition}%
+  {Proposition}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
+
+\newtcbtheorem[use counter=theorem]{siilemma}%
+  {Lemma}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
+
+\newtcbtheorem[use counter=theorem]{siicorollary}%
+  {Corollary}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
+
+\newtcbtheorem[use counter=theorem]{siiconjecture}%
+  {Conjecture}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
+
+\newtcbtheorem[use counter=theorem]{siidefinition}%
+  {Definition}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
+
+%\newtcbtheorem{siiproof}%
+%  {Proof}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+%    colback=white, colframe=white, colbacktitle=white, coltitle=siiorange}{definition}
+
+
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\title{Permutation Fair Dice}
+\author{Michael Purcell}
+\date{21 July 2021}
+
+\begin{document}
+
+\begin{frame}[Triangle=siiorange]
+\titlepage
+\end{frame}
+
+\section{Prior Art}
+\begin{frame}[Triangle=siiorange]
+	\tocpage
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Go First Dice}
+In 2010 Robert Ford and Eric Harshberger discovered a set of four 12-sided dice that they called "Go First DIce".
+
+\vfill
+
+These dice are non-standard dice and are numbered such that when rolled together:
+\begin{itemize}
+	\item No two dice will ever show the same value.
+	\item When sorted according to the values shown on the faces every permutation of the dice is equally likely.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Go First Dice Details}
+The numbers on the faces of the Go First Dice are:
+\begin{table}
+\begin{tabular}{c rrrrrrrrrrrr} \toprule
+\multirow{2}[2]{*}{Die} &  \multicolumn{12}{c}{Faces} \\ \cmidrule(lr){2-13}     
+   & i & ii & iii & iv & v & vi & vii & viii & ix & x & xi & xii \\ \midrule
+A & 1 & 8 & 11 & 14 & 19 & 22 & 27 & 30 & 35 & 38 & 41 & 48 \\
+B & 2 & 7 & 10 & 15 & 18 & 23 & 26 & 31 & 34 & 39 & 42 & 47 \\
+C & 3 & 6 & 12 & 13 & 17 & 24 & 25 & 32 & 36 & 37 & 43 & 46 \\
+D & 4 & 5 & 9 & 16 & 20 & 21 & 28 & 29 & 33 & 40 & 44 & 45 \\ \bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Three-Player Go First Dice}
+It is also possible to construct a set of three 6-sided dice that are permutation fair. 
+
+\vfill
+
+The numbers on the faces of one such set are:
+\begin{table}
+\begin{tabular}{c rrrrrr} \toprule
+\multirow{2}[2]{*}{Die} &  \multicolumn{6}{c}{Faces} \\ \cmidrule(lr){2-7}     
+   & i & ii & iii & iv & v & vi \\ \midrule
+A & 1 & 5 & 10 & 11 & 13 & 17 \\
+B & 3 & 4 & 7 & 12 & 15 & 16 \\
+C & 2 & 6 & 8 & 9 & 14 & 18 \\ \bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Five Player Go First Dice?}
+Notice that for a set of $n$ $s$-sided dice to be permutation fair,  the number of possible outcomes must be divisible by the number of permutations on $n$ elements.
+
+\vfill
+
+That is, we must have $n! \ \vert \ n^s$.
+
+\vfill
+
+So, for any set of five $s$-sided permutation fair dice we must have $ 30 \ \vert \ s$.
+
+\vfill
+
+No one knows if such a set of dice exists!
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Larger Face Counts}
+Eric Harshberger has discovered several sets of five-player permutation fair dice with significantly more than thirty faces per die.
+
+\vfill
+
+Most of those sets are comprised of dice with different numbers of faces.  The non-homogeneous dice can be homogenized by duplicating the faces on each die to create a set of $s$-sided dice where $s$ is the least common multiple of the number of faces on each of the original dice.
+
+\vfill
+
+The best such set of dice that he has found can be realized as a set of five 180-sided dice.
+\end{frame}
+
+\section{My Contributions}
+\begin{frame}[Triangle=siiorange]
+	\tocpage
+\end{frame}
+
+
+\subsection{Notation}
+\begin{frame}[triangle=siiblue]
+\frametitle{Dice as Strings}
+A common convention in other works on non-standard dice is to represent each set of dice as a string.
+
+\vfill
+
+A set of $n$ dice is represented by a string comprised of $n$ distinct characters.  
+
+\vfill
+
+The values on the faces of the dice are assigned in according to the indices of the corresponding symbols in the string.
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{String Notation Example}
+For example, consider the three-player permutation fair dice with face values given by:
+\begin{table}
+\begin{tabular}{c rrrrrr} \toprule
+\multirow{2}[2]{*}{Die} &  \multicolumn{6}{c}{Faces} \\ \cmidrule(lr){2-7}     
+   & i & ii & iii & iv & v & vi \\ \midrule
+A & 1 & 6 & 8 & 11 & 15 & 16 \\
+B & 2 & 5 &  9 & 10 & 13 & 18 \\
+C & 3 & 4 & 7 & 12 & 14 & 17 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\vfill
+
+This set of dice can also be represented by the string:
+\begin{equation*}
+		\texttt{abccba} \ \texttt{cabbac} \ \texttt{bcaacb}
+\end{equation*}
+\end{frame}
+
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Go First String}
+The string representation of Go First Dice is:
+\begin{equation*}
+	\texttt{abcddcba} \ \texttt{dbaccabd} \ \texttt{cbaddabc} \  \texttt{cbaddabc} \ \texttt{dbaccabd} \ \texttt{abcddcba}
+\end{equation*}
+We'll call this string the \emph{Go First String}.
+
+\vfill
+
+Notice that:
+\begin{itemize}
+	\item The Go First String is a palindrome.  
+	\item Both halves of the Go First String can be decomposed into three blocks, each of which is itself a palindrome.
+\end{itemize}
+\end{frame}
+
+\subsection{Preliminary Results}
+\begin{frame}[triangle=siiblue]
+\frametitle{Palindromes}
+\begin{siiproposition}[label=palindrome]{}{}
+Let $S$ be a set dice with $|S| = n$ and let $s$ be the string representation of $S$.  If $s$ is a palindrome,  then we have $\mathbf{P}\{X < Y\} = 1/2$ for all $X,Y \in S$. 
+\end{siiproposition}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Proof of Proposition \ref{palindrome}}
+If $s$ is a palindrome, then $s = t \Vert t'$ for some $t$.  So, 
+\begin{equation}\nonumber
+\begin{split}
+(xy)_s &= (xy)_{t \Vert t'} \\
+&= (xy)_t + (xy)_{t'} + (x)_s(y)_{t'} \\
+&= (xy)_t + \big((x)_t(y)_t - (xy)_t\big) + (x)_t(y)_t \\
+&= 2(x)_t(y)_t.
+\end{split}
+\end{equation}
+
+\vfill
+
+Therefore we have
+\begin{equation*}
+\mathbf{P}\{X < Y\} = \frac{2(x)_t(y)_t}{\big(2(x)_t\big)\big(2(y)_t\big)} = \frac{1}{2}.  \qed
+\end{equation*}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{$m/n$ Permutation Fairness}
+\begin{siidefinition}{}{}
+	A set of dice $S$ is $m/n$ permutation fair if $|S| = n$ and every subset $T \subset S$ with $|T| \leq m$ is permutation fair.
+\end{siidefinition}
+
+\vfill
+
+\begin{siilemma}[label=perm_fair_counts]{}{}
+Let $S$ be a set of dice with string representation $s$.  $S$ is $m/n$ permutation fair if and only if
+\begin{equation*}
+(\mathbf{x})_s = \frac{d_s^k}{k!}.
+\end{equation*}
+for all $\mathbf{x} \subset s$ with $|\mathbf{x}| \leq m$.
+\end{siilemma}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Concatenating Dice}
+\begin{siidefinition}{}{}
+Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respectively.   We define $S \Vert T$ to be the set of dice with string representation $s \Vert t$. 
+\end{siidefinition}
+
+\begin{siilemma}[label=perm_fair_cat_counts]{}{}
+Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respectively. If $\mathbf{x} \subset s$ with $|\mathbf{x}| = m$ then
+\begin{equation*}
+(\mathbf{x})_{s \Vert t} = \sum_{i=0}^{m} (\mathbf{x_{j \leq i}})_s (\mathbf{x}_{j > i})_t
+\end{equation*}
+\end{siilemma}
+
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Main Results}
+\begin{siitheorem}[label=mn_perm_fair]{}{}
+Let $S$ and $T$ be sets of dice. If $S$ and $T$ are $m/n$ permutation fair then $S \Vert T$ is $m/n$ permutation fair.
+\end{siitheorem}
+
+\begin{siitheorem}[label=lifting]{}{}
+For all $1 \leq i \leq k$ let $S_i$ be a set of $m/n$ permutation fair dice with string representation $s_i$. If there exists a constant $C$ such that $\sum (\mathbf{x})_{s_i} = C$ for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = m+1$, then $S_1 \Vert S_2 \Vert \ldots \Vert S_k$ is $(m+1)/n$ permutation fair.
+\end{siitheorem}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Proof of Theorem \ref{mn_perm_fair}}
+Because $S$ and $T$ are $m/n$ permutation fair,  Lemma \ref{perm_fair_counts} implies that for all $0 \leq i \leq m$ we have
+\begin{equation*}
+	(\mathbf{x}_{j\leq i})_s = \frac{d_s^i}{i!}  \qquad and \qquad (\mathbf{x}_{j > i})_t = \frac{d_t^{m-i}}{(m-i)!}.
+\end{equation*}
+
+\vfill
+
+Therefore,  Lemma \ref{perm_fair_cat_counts} implies that
+\begin{equation*}
+(\mathbf{x})_{s \Vert t} = \frac{1}{m!} \sum_{i=0}^m \binom{m}{i} d_s^i d_t^{m-i} = \frac{(d_s + d_t)^m}{m!}. 
+\end{equation*}
+
+The result follows from another application of Lemma \ref{perm_fair_counts}.  \qed
+\end{frame}
+
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Revisiting $n=3$}
+Consider the strings $r = \texttt{abccba}$, $s = \texttt{cabbac}$, and $t = \texttt{bcaacb}$.
+
+
+\vfill
+
+We have
+\begin{table}
+\begin{tabular}{c ccc} \toprule
+$\mathbf{x}$ & $(\mathbf{x})_r$ & $(\mathbf{x})_s$ & $(\mathbf{x})_t$ \\ \midrule
+$(\texttt{a}, \texttt{b}, \texttt{c})$ & 2 & 2 & 0 \\
+$(\texttt{a}, \texttt{c}, \texttt{b})$ & 2 & 0 & 2 \\
+$(\texttt{b}, \texttt{a}, \texttt{c})$ & 0 & 2 & 2 \\
+$(\texttt{b}, \texttt{c}, \texttt{a})$ & 2 & 0 & 2 \\
+$(\texttt{c}, \texttt{a}, \texttt{b})$ & 0 & 2 & 2 \\
+$(\texttt{c}, \texttt{b}, \texttt{a})$ &  2 & 2 & 0 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\vfill
+
+So, Theorem \ref{lifting} implies that $r \Vert s \Vert t$ is $3/3$ permutation fair. 
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Revisiting $n=4$}
+The Go First String can be written as $r \Vert s \Vert t \Vert t' \Vert s' \Vert r'$ where $r = \texttt{abcddcba}$,  $s = dbaccabd$, and  $t = cbaddabc$.
+
+\vfill
+
+Observe that $r$,  $s$ and $t$ are $2/4$ permutation fair.
+
+\vfill
+
+For all $\mathbf{x}$ with $|\mathbf{x}| = 3$ we have $(\mathbf{x})_r + (\mathbf{x})_s + (\mathbf{x})_t = 36$. Therefore, Theorem \ref{lifting} implies that $r \Vert s \Vert t$ is $3/4$ permutation fair.
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Lifting from $3/n$ to $4/n$}
+If we let $v$ = $r \Vert s \Vert t$ then $v$ is $3/4$ permutation fair, then $v'$ is $3/4$ permutation fair and $v \Vert v'$ is the Go First String. Therefore, $v \Vert v'$ is $4/4$ permutation fair.
+
+\vfill
+
+We've seen this phenomenon in other cases as well but haven't been able to turn it into a theorem.  As such, we make the following conjecture.
+
+\vfill
+
+\begin{siiconjecture}[label=lift_34]{}{}
+If $s$ is $3/n$ permutation fair and $s$ is a palindrome, then $s$ is $4/n$ permutation fair.
+\end{siiconjecture}
+\end{frame}
+
+\subsection{New Contstructions}
+\begin{frame}[triangle=siiblue]
+\frametitle{Tackling $n=5$}
+We start with the string $s = \texttt{abcde edcba}$. Notice that $s$ is $2/5$ permutation fair.
+
+\vfill
+
+Observe that if $\sigma$ is a permutation on the characters $(\texttt{a}, \texttt{b},\texttt{c},\texttt{d},\texttt{e})$, then $\sigma(s)$ is $2/5$ permutation fair as well.
+
+\vfill
+
+If we can find a set of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that $\sigma_1(s) \Vert \sigma_2(s) \Vert \ldots \Vert \sigma_k(s)$ is $3/5$ permutation fair. 
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{A Family of Permutations}
+It turns out that we can find such a family!
+\begin{align*}
+	\sigma_1 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e}
+		\end{pmatrix}
+	\qquad
+	\sigma_2 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{d} & \texttt{c} & \texttt{b} & \texttt{a} & \texttt{e}
+		\end{pmatrix} \\
+	\sigma_3 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{e} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{d}
+		\end{pmatrix}
+	\qquad
+	\sigma_4 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{a} & \texttt{c} & \texttt{b} & \texttt{d} & \texttt{e}
+		\end{pmatrix} \\
+	\sigma_5 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{d} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{e}
+		\end{pmatrix}
+	\qquad
+	\sigma_6 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{e} & \texttt{c} & \texttt{b} & \texttt{a} & \texttt{d}
+		\end{pmatrix} \\
+\end{align*}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Turning the Crank}
+If we let $t$ = $\sigma_1(s) \Vert \sigma_2(s) \Vert \sigma_3(s) \Vert \sigma_4(s) \Vert \sigma_5(s) \Vert \sigma_6(s)$ then $t$ is the string representation of a set of five 12-sided dice which are $3/5$ permutation fair. 
+
+\vfill
+
+Guided by Conjecture \ref{lift_34}, we guess that $u = t \Vert t'$ might represent a set of five 24-sided dice that are $4/5$ permutation fair.
+
+\vfill
+
+Indeed it is!  We find that for all $\mathbf{x}$ with $|\mathbf{x}| = 4$ we have $(\mathbf{x})_u = 24^4 / 24 = 24^3 = 1384$ as per Lemma \ref{perm_fair_counts}.
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{An Ugly Finish}
+We used a trick to lift our $3/5$ permutation fair dice to a set of $4/5$ permutation fair dice.
+
+\vfill
+
+We haven't found a similar trick that we can apply to efficiently lift that solution to a set of $5/5$ permutation fair dice.
+
+\vfill
+
+The best we've been able to do so far is to let
+\begin{equation*}
+v = \bigparallel_{\sigma \in S_5} \sigma(u).
+\end{equation*}
+
+\vfill
+
+This results in a string that represents a set of five 2880-sided dice that are 5/5 permutation fair.
+
+\end{frame}
+
+\section{Future Work}
+\begin{frame}[Triangle=siiorange]
+	\tocpage
+\end{frame}
+
+
+\section{References}
+\begin{frame}[Triangle=siiorange]
+	\tocpage
+\end{frame}
+
+\end{document}
