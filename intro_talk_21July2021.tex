@@ -28,9 +28,9 @@
   {Definition}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
-%\newtcbtheorem{siiproof}%
-%  {Proof}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
-%    colback=white, colframe=white, colbacktitle=white, coltitle=siiorange}{definition}
+\newtcbtheorem{siiproof}%
+  {Proof}{fonttitle=\bfseries\upshape\Large, fontupper=\slshape,
+    colback=white, colframe=white, colbacktitle=white, coltitle=siiorange}{definition}
 
 
 \usepackage{booktabs}
@@ -99,15 +99,15 @@ C & 2 & 6 & 8 & 9 & 14 & 18 \\ \bottomrule
 
 \begin{frame}[triangle=siiblue]
 \frametitle{Five Player Go First Dice?}
-Notice that for a set of $n$ $s$-sided dice to be permutation fair,  the number of possible outcomes must be divisible by the number of permutations on $n$ elements.
+Notice that for a set of $n$ $d$-sided dice to be permutation fair,  the number of possible outcomes must be divisible by the number of permutations on $n$ elements.
 
 \vfill
 
-That is, we must have $n! \ \vert \ n^s$.
+That is, we must have $n! \ \vert \ d^n$.
 
 \vfill
 
-So, for any set of five $s$-sided permutation fair dice we must have $ 30 \ \vert \ s$.
+So, for any set of five $d$-sided permutation fair dice we must have $ 30 \ \vert \ d$.
 
 \vfill
 
@@ -133,7 +133,7 @@ The best such set of dice that he has found can be realized as a set of five 180
 \end{frame}
 
 
-\subsection{Notation}
+\subsection{Terminology and Notation}
 \begin{frame}[triangle=siiblue]
 \frametitle{Dice as Strings}
 A common convention in other works on non-standard dice is to represent each set of dice as a string.
@@ -148,7 +148,7 @@ The values on the faces of the dice are assigned in according to the indices of 
 \end{frame}
 
 \begin{frame}[triangle=siiblue]
-\frametitle{String Notation Example}
+\frametitle{String Representation Example}
 For example, consider the three-player permutation fair dice with face values given by:
 \begin{table}
 \begin{tabular}{c rrrrrr} \toprule
@@ -186,34 +186,6 @@ Notice that:
 \end{itemize}
 \end{frame}
 
-\subsection{Preliminary Results}
-\begin{frame}[triangle=siiblue]
-\frametitle{Palindromes}
-\begin{siiproposition}[label=palindrome]{}{}
-Let $S$ be a set dice with $|S| = n$ and let $s$ be the string representation of $S$.  If $s$ is a palindrome,  then we have $\mathbf{P}\{X < Y\} = 1/2$ for all $X,Y \in S$. 
-\end{siiproposition}
-\end{frame}
-
-\begin{frame}[triangle=siiblue]
-\frametitle{Proof of Proposition \ref{palindrome}}
-If $s$ is a palindrome, then $s = t \Vert t'$ for some $t$.  So, 
-\begin{equation}\nonumber
-\begin{split}
-(xy)_s &= (xy)_{t \Vert t'} \\
-&= (xy)_t + (xy)_{t'} + (x)_s(y)_{t'} \\
-&= (xy)_t + \big((x)_t(y)_t - (xy)_t\big) + (x)_t(y)_t \\
-&= 2(x)_t(y)_t.
-\end{split}
-\end{equation}
-
-\vfill
-
-Therefore we have
-\begin{equation*}
-\mathbf{P}\{X < Y\} = \frac{2(x)_t(y)_t}{\big(2(x)_t\big)\big(2(y)_t\big)} = \frac{1}{2}.  \qed
-\end{equation*}
-\end{frame}
-
 \begin{frame}[triangle=siiblue]
 \frametitle{$m/n$ Permutation Fairness}
 \begin{siidefinition}{}{}
@@ -225,9 +197,9 @@ Therefore we have
 \begin{siilemma}[label=perm_fair_counts]{}{}
 Let $S$ be a set of dice with string representation $s$.  $S$ is $m/n$ permutation fair if and only if
 \begin{equation*}
-(\mathbf{x})_s = \frac{d_s^k}{k!}.
+(\mathbf{x})_s = \frac{d_s^m}{m!}.
 \end{equation*}
-for all $\mathbf{x} \subset s$ with $|\mathbf{x}| \leq m$.
+for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = m$.
 \end{siilemma}
 \end{frame}
 
@@ -236,7 +208,40 @@ for all $\mathbf{x} \subset s$ with $|\mathbf{x}| \leq m$.
 \begin{siidefinition}{}{}
 Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respectively.   We define $S \Vert T$ to be the set of dice with string representation $s \Vert t$. 
 \end{siidefinition}
+\end{frame}
 
+\subsection{Preliminary Results}
+\begin{frame}[triangle=siiblue]
+\frametitle{Palindromes}
+\begin{siiproposition}[label=palindrome]{}{}
+Let $S$ be a set dice with $|S| = n$ and let $s$ be the string representation of $S$.  If $s = t \Vert t'$ for some string $t$,  then $s$ is $2/n$ permutation fair. 
+\end{siiproposition}
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Proof of Proposition \ref{palindrome}}
+Because $s = t \Vert t'$ for some $t$, for all $x,y \in s$ we have 
+\begin{equation}\nonumber
+\begin{split}
+(xy)_s &= (xy)_{t \Vert t'} \\
+&= (xy)_t + (xy)_{t'} + (x)_s(y)_{t'} \\
+&= (xy)_t + \big(d_t^2 - (xy)_t\big) + d_t^2 \\
+&= 2d_t^2.
+\end{split}
+\end{equation}
+
+\vfill
+
+Furthermore, $s = t \Vert t'$ implies that $d_s = 2d_t$. Therefore,
+\begin{equation*}
+(xy)_s = 2d_t^2 = \frac{d_s^2}{2}.
+\end{equation*}
+The result then follows from Lemma \ref{perm_fair_counts}. \qed
+\end{frame}
+
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Concatenation Theorem}
 \begin{siilemma}[label=perm_fair_cat_counts]{}{}
 Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respectively. If $\mathbf{x} \subset s$ with $|\mathbf{x}| = m$ then
 \begin{equation*}
@@ -244,16 +249,10 @@ Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respecti
 \end{equation*}
 \end{siilemma}
 
-\end{frame}
-
-\begin{frame}[triangle=siiblue]
-\frametitle{Main Results}
-\begin{siitheorem}[label=mn_perm_fair]{}{}
+\vfill
+ 
+\begin{siitheorem}[label=mn_perm_fair]{Concatenation Theorem}{}
 Let $S$ and $T$ be sets of dice. If $S$ and $T$ are $m/n$ permutation fair then $S \Vert T$ is $m/n$ permutation fair.
-\end{siitheorem}
-
-\begin{siitheorem}[label=lifting]{}{}
-For all $1 \leq i \leq k$ let $S_i$ be a set of $m/n$ permutation fair dice with string representation $s_i$. If there exists a constant $C$ such that $\sum (\mathbf{x})_{s_i} = C$ for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = m+1$, then $S_1 \Vert S_2 \Vert \ldots \Vert S_k$ is $(m+1)/n$ permutation fair.
 \end{siitheorem}
 \end{frame}
 
@@ -274,11 +273,24 @@ Therefore,  Lemma \ref{perm_fair_cat_counts} implies that
 The result follows from another application of Lemma \ref{perm_fair_counts}.  \qed
 \end{frame}
 
+\begin{frame}[triangle=siiblue]
+\frametitle{Relabelling Theorem}
+\begin{siitheorem}[label=relabelling]{Relabelling Theorem}{}
+Let $S$ be a set of dice that is 
+\end{siitheorem}
 
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Lifting Theorem}
+\begin{siitheorem}[label=lifting]{Lifting Theorem}{}
+For all $1 \leq i \leq k$ let $S_i$ be a set of $m/n$ permutation fair dice with string representation $s_i$. If there exists a constant $C$ such that $\sum (\mathbf{x})_{s_i} = C$ for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = m+1$, then $S_1 \Vert S_2 \Vert \ldots \Vert S_k$ is $(m+1)/n$ permutation fair.
+\end{siitheorem}
+
+\end{frame}
 \begin{frame}[triangle=siiblue]
 \frametitle{Revisiting $n=3$}
 Consider the strings $r = \texttt{abccba}$, $s = \texttt{cabbac}$, and $t = \texttt{bcaacb}$.
-
 
 \vfill
 
