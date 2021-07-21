@@ -187,8 +187,19 @@ Notice that:
 \end{frame}
 
 \begin{frame}[triangle=siiblue]
+\frametitle{Strings as Dice}
+We can use the string representation of a set of dice to compute the probabilities of various outcomes when the dice are rolled.
+
+\vfill
+
+In particular, we can compute the number of ways that each permutation of the dice can occur when the dice are rolled.
+
+
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
 \frametitle{$m/n$ Permutation Fairness}
-\begin{siidefinition}{}{}
+\begin{siidefinition}{$m/n$ Permutation Fairness}{}
 	A set of dice $S$ is $m/n$ permutation fair if $|S| = n$ and every subset $T \subset S$ with $|T| \leq m$ is permutation fair.
 \end{siidefinition}
 
@@ -276,7 +287,7 @@ The result follows from another application of Lemma \ref{perm_fair_counts}.  \q
 \begin{frame}[triangle=siiblue]
 \frametitle{Relabelling Theorem}
 \begin{siitheorem}[label=relabelling]{Relabelling Theorem}{}
-Let $S$ be a set of dice that is 
+Let $S$ be a set of dice with string representation $s$ and $\sigma$ be a permutation on the characters of $s$.  $S$ is $m/n$ permutation fair if and only if $\sigma(s)$ is $m/n$ permutation fair.
 \end{siitheorem}
 
 \end{frame}
@@ -318,7 +329,7 @@ The Go First String can be written as $r \Vert s \Vert t \Vert t' \Vert s' \Vert
 
 \vfill
 
-Observe that $r$,  $s$ and $t$ are $2/4$ permutation fair.
+Observe that $r$,  $s$ and $t$ are $2/4$ permutation fair. This is a consequence of both Proposition \ref{palindrome} and Theorem \ref{relabelling}.
 
 \vfill
 
@@ -347,16 +358,17 @@ We start with the string $s = \texttt{abcde edcba}$. Notice that $s$ is $2/5$ pe
 
 \vfill
 
-Observe that if $\sigma$ is a permutation on the characters $(\texttt{a}, \texttt{b},\texttt{c},\texttt{d},\texttt{e})$, then $\sigma(s)$ is $2/5$ permutation fair as well.
+As per Theorem \ref{relabelling},  if $\sigma$ is a permutation on the characters $(\texttt{a}, \texttt{b},\texttt{c},\texttt{d},\texttt{e})$ then $\sigma(s)$ is $2/5$ permutation fair as well.
 
 \vfill
 
-If we can find a set of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that $\sigma_1(s) \Vert \sigma_2(s) \Vert \ldots \Vert \sigma_k(s)$ is $3/5$ permutation fair. 
+If we can find a family of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that $\sigma_1(s) \Vert \sigma_2(s) \Vert \ldots \Vert \sigma_k(s)$ is $3/5$ permutation fair. 
 \end{frame}
 
 \begin{frame}[triangle=siiblue]
 \frametitle{A Family of Permutations}
-It turns out that we can find such a family!
+It turns out that we can find such a family:
+\vfill
 \begin{align*}
 	\sigma_1 &= \begin{pmatrix}
 		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
@@ -394,11 +406,11 @@ If we let $t$ = $\sigma_1(s) \Vert \sigma_2(s) \Vert \sigma_3(s) \Vert \sigma_4(
 
 \vfill
 
-Guided by Conjecture \ref{lift_34}, we guess that $u = t \Vert t'$ might represent a set of five 24-sided dice that are $4/5$ permutation fair.
+Guided by Conjecture \ref{lift_34}, we guess that $u = t \Vert t'$ represents a set of five 24-sided dice that are $4/5$ permutation fair.
 
 \vfill
 
-Indeed it is!  We find that for all $\mathbf{x}$ with $|\mathbf{x}| = 4$ we have $(\mathbf{x})_u = 24^4 / 24 = 24^3 = 1384$ as per Lemma \ref{perm_fair_counts}.
+It does!  We find that for all $\mathbf{x}$ with $|\mathbf{x}| = 4$ we have $(\mathbf{x})_u = 24^4 / 24 = 24^3 = 1384$ as per Lemma \ref{perm_fair_counts}.
 \end{frame}
 
 \begin{frame}[triangle=siiblue]
