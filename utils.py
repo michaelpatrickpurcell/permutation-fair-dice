@@ -93,10 +93,10 @@ def dice_to_constraints(dice, dtype=np.int):
 def score_orders(word, k, verbose=False):
     dice = word_to_dice(word)
     dice_names = list(dice.keys())
-    d = len(dice[dice_names[0]])
     constraints = dice_to_constraints(dice, dtype=np.float)
     scores = dict()
     for x in permutations(dice_names, k):
+        d = len(dice[x[0]])
         accum = np.eye(d, d)
         for y, z in zip(x[:-1], x[1:]):
             accum = accum @ constraints[(y, z)]
