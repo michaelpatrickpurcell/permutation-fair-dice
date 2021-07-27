@@ -69,9 +69,9 @@ print(set(score.values()))
 from pyeasyga import pyeasyga
 from collections import Counter
 
-n = 3
+n = 4
 order_len = 3
-word_1 = "abc"
+word_1 = "abcd"
 d = 6
 data = list(word_1 * (n*d))
 
@@ -126,8 +126,8 @@ def crossover(parent_1, parent_2):
 
 
 ga = pyeasyga.GeneticAlgorithm(data)        # initialise the GA with data
-ga.population_size = 1000                    # increase population size to 200 (default value is 50)
-ga.generations = 1000
+ga.population_size = 2000                    # increase population size to 200 (default value is 50)
+ga.generations = 10000
 ga.fitness_function = fitness               # set the GA's fitness function
 ga.create_individual = create_individual
 # ga.crossover = crossover

@@ -107,6 +107,30 @@ def score_orders(word, k, verbose=False):
     return scores
 
 
+def score_orders2(word, k, verbose=False):
+    l = len(word)
+    dice_names = sorted(list(set(word)))
+    row_lut = {(x,):i for i,x in enumerate(dice_names)}
+    n = len(dice_names)
+    indicator = np.zeros((n,l), dtype=np.int)
+    for i,x in enumerate(word):
+        indicator[row_lut[(x,)],i] = True
+    accumulator = np.cumsum(indicator, axis=1)
+    accumulators = [accumulator]
+    row_luts = [row_lut]
+    for m in range(2,k+1):
+        keys = sorted(list(permutations(dice_names, m)))
+        row_lut = {x:i for i,x in enumerate(keys)}
+        accumulator = np.zeros((len(keys), l), dtype=np.int)
+        for i,x in enumerate(keys):
+            mask = indicator[row_luts[0][x[-1:]]]
+            j = row_luts[-1][x[:-1]]
+            accumulator[i] = np.cumsum(accumulators[-1][j] * mask)
+        row_luts.append(row_lut)
+        accumulators.append(accumulator)
+    ret = {x:accumulators[-1][row_luts[-1][x]][-1] for x in keys}
+    return ret
+
 def aggregate_scores(*args):
     aggregator = dict()
     for arg in args:
@@ -140,7 +164,7 @@ def coverage_search(
     for root in tqdm(ext_roots):
         for perm in all_perms:
             perm_word = permute_letters(root, perm)
-            perm_score = score_orders(perm_word, order_len)
+            perm_score = score_orders2(perm_word, order_len)
             if perm_word not in perm_words:
                 nscore = normalize_score(perm_score)
                 candidates[(root, perm)] = nscore
@@ -153,7 +177,7 @@ def coverage_search(
     else:
         blacklist = []
     used_perms = [(word, tuple(range(m)))]
-    current_score = normalize_score(score_orders(used_perms[0][0], order_len))
+    current_score = normalize_score(score_orders2(used_perms[0][0], order_len))
     current_norm = norm(current_score)
     print(current_norm)
     while not np.isclose(current_norm, 0, atol=0.05):

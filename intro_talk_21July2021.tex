@@ -228,7 +228,7 @@ Let $S$ and $T$ be sets of dice with string representations $s$ and $t$ respecti
 \begin{frame}[triangle=siiblue]
 \frametitle{Palindromes}
 \begin{siiproposition}[label=palindrome]{}{}
-Let $S$ be a set dice with $|S| = n$ and let $s$ be the string representation of $S$.  If $s = t \Vert t'$ for some string $t$,  then $s$ is $2/n$ permutation fair. 
+Let $S$ be a set of dice with $|S| = n$ and let $s$ be the string representation of $S$.  If $s = t \Vert t'$ for some string $t$,  then $s$ is $2/n$ permutation fair. 
 \end{siiproposition}
 \end{frame}
 
@@ -378,22 +378,22 @@ It turns out that we can find such a family:
 		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e}
 		\end{pmatrix}
 	\qquad
-	\sigma_2 = \begin{pmatrix}
-		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
-		\texttt{d} & \texttt{c} & \texttt{b} & \texttt{a} & \texttt{e}
-		\end{pmatrix} \\
-	\sigma_3 &= \begin{pmatrix}
-		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
-		\texttt{e} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{d}
-		\end{pmatrix}
-	\qquad
 	\sigma_4 = \begin{pmatrix}
 		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
 		\texttt{a} & \texttt{c} & \texttt{b} & \texttt{d} & \texttt{e}
-		\end{pmatrix} \\
-	\sigma_5 &= \begin{pmatrix}
+		\end{pmatrix} \\ \\
+	\sigma_2 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{d} & \texttt{c} & \texttt{b} & \texttt{a} & \texttt{e}
+		\end{pmatrix}
+	\qquad
+	\sigma_5 = \begin{pmatrix}
 		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
 		\texttt{d} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{e}
+		\end{pmatrix} \\ \\
+	\sigma_3 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} \\
+		\texttt{e} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{d}
 		\end{pmatrix}
 	\qquad
 	\sigma_6 = \begin{pmatrix}

@@ -28,7 +28,6 @@ for x in permutations("abcd"):
         M_list.append(row)
     # M_list.append(np.ones(24))
 
-
 M = np.matrix(M_list).astype(np.int)
 rank = np.linalg.matrix_rank(M)
 print(rank)
@@ -45,28 +44,37 @@ print(rank)
 N = np.matrix(M_list)
 
 
-ZM = [snf.z.Z(int(N[i,j])) for i in range(N.shape[0]) for j in range(N.shape[1])]
-original_matrix = snf.matrix.Matrix(N.shape[0], N.shape[1], ZM)
-prob = snf.snfproblem.SNFProblem(original_matrix)
-prob.computeSNF()
+# ZM = [snf.z.Z(int(N[i,j])) for i in range(N.shape[0]) for j in range(N.shape[1])]
+# original_matrix = snf.matrix.Matrix(N.shape[0], N.shape[1], ZM)
+# prob = snf.snfproblem.SNFProblem(original_matrix)
+# prob.computeSNF()
+#
+# S = np.matrix([x.a for x in prob.S.elements]).reshape((23,23))
+# A = np.matrix([x.a for x in prob.A.elements]).reshape((23,24))
+# T = np.matrix([x.a for x in prob.T.elements]).reshape((24,24))
+# J = np.matrix([x.a for x in prob.J.elements]).reshape((23,24))
 
-S = np.matrix([x.a for x in prob.S.elements]).reshape((23,23))
-A = np.matrix([x.a for x in prob.A.elements]).reshape((23,24))
-T = np.matrix([x.a for x in prob.T.elements]).reshape((24,24))
-J = np.matrix([x.a for x in prob.J.elements]).reshape((23,24))
+
+
+with open("snf_n.pickle", "rb") as handle:
+    J = pickle.load(handle)
+
+with open("snf_u.pickle", "rb") as handle:
+    S = pickle.load(handle)
+
+with open("snf_v.pickle", "rb") as handle:
+    T = pickle.load(handle)
+
 
 d = 12
 C = (d**4 // 6) * np.ones(N.shape[0], dtype=np.int)
 
 D = (S @ C)
-E = np.array((D / np.diag(J)).tolist()[0] + [d**4 // 24])
-X = T @ E
-
-E = np.array((D / np.diag(J)).tolist()[0] + [d**4 // 24])
+E = np.array((D[0,:23] / np.diag(J)[:23]).tolist()[0] + [d**4 // 24])
 X = T @ E
 
 for i in range(-2**10, 2**10):
-    E = np.array((D / np.diag(J)).tolist()[0] + [i])
+    E = np.array((D[0,:23] / np.diag(J)[:23]).tolist()[0] + [i])
     X = T @ E
     if np.all(X >= 0):
         print(i)

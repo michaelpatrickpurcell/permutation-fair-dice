@@ -7,7 +7,7 @@ from collections import Counter
 from itertools import combinations, permutations, product
 
 from utils import coverage_search, coverage_search2
-from utils import permute_letters, score_orders
+from utils import permute_letters, apply_perm, score_orders, score_orders2
 from utils import aggregate_scores, normalize_score
 from utils import word_to_dice, dice_to_word
 from utils import l0_norm, l1_norm, l2_norm, l4_norm, max_norm
@@ -45,9 +45,27 @@ n = 5
 word_1 = "abcde"
 word_2 = word_1 + word_1[::-1]
 used_perms = coverage_search(word_2, 3, norm=l4_norm)
-word_3 = ''.join([permute_letters(w, p) for w,p in used_perms])
+foo = [permute_letters(w, p) for w,p in used_perms]
+word_3 = ''.join(foo)
 word_4 = word_3 + word_3[::-1]
 word_5 = ''.join([permute_letters(word_4, p) for p in permutations(range(5))])
+
+
+used_perms2 = coverage_search(word_3, 4, norm=l2_norm)
+foo = [permute_letters(w,p) for w,p in used_perms2]
+bar = ''.join(foo)
+
+
+used_perms3 = coverage_search(word_2, 5, norm=l2_norm)
+foo = [permute_letters(w,p) for w,p in used_perms3]
+bar = ''.join(foo)
+
+perms1 = [p for w,p in used_perms]
+perms2 = [p for w,p in used_perms3]
+
+compound_perms = []
+for p1,p2 in product(perms1, perms2):
+    compound_perms.append(apply_perm(p1,p2))
 
 
 # ============================================================================
@@ -64,4 +82,15 @@ used_perms2 = coverage_search(word2a, 3, norm=max_norm, max_len=2)
 word2b = ''.join(permute_letters(w,p) for w,p in used_perms2)
 used_perms3 = coverage_search(word2b, 3, norm=l2_norm)
 word_3 = ''.join(permute_letters(w,p) for w,p in used_perms3)
+word_4 = word_3 + word_3[::-1]
+
+# ============================================================================
+# This section generates sets of dice that are:
+#   6d12 that are 2/6 perm fair
+#   6d60 that are 3/6 perm fair
+#   6d120 that are 4/6 perm_fair
+n = 6
+word_2 = "abbacddceffeeffecddcabbaeffeabbacddccddcabbaeffecddceffeabbaabbaeffecddc"
+used_perms = coverage_search(word_2, 3, norm=l2_norm)
+word_3 = ''.join([permute_letters(w, p) for w,p in used_perms])
 word_4 = word_3 + word_3[::-1]
