@@ -60,7 +60,19 @@ k = 5
 m = 10
 all_perms = list(permutations(range(n)))
 all_orders = list(permutations(word_1, k))
-counts = [score_orders2(permute_letters(word_4, p), k) for p in all_perms]
+
+# Permute the 4/n word directly
+#counts = [score_orders2(permute_letters(word_4, p), k) for p in all_perms]
+
+# Permute the starting atom first and then lift it to a 4/n fair word
+counts = []
+for p in all_perms:
+    root = permute_letters(word_2, p)
+    foo = [permute_letters(root, up) for up in perms]
+    bar = ''.join(foo)
+    ram = bar + bar[::-1]
+    counts.append(score_orders2(ram, k))
+
 target = m * sum(counts[0].values()) // len(all_orders)
 
 xs = [pulp.LpVariable("x%i" % i, 0, 1, cat="Integer") for i,p in enumerate(all_perms)]
