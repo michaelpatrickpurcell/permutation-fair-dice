@@ -355,17 +355,26 @@ If $s$ is $3/n$ permutation fair and $s$ is a palindrome, then $s$ is $4/n$ perm
 \end{frame}
 
 \subsection{New Contstructions}
+%\subsubsection{$n=5$}
 \begin{frame}[triangle=siiblue]
 \frametitle{Tackling $n=5$}
-We start with the string $s = \texttt{abcde edcba}$. Notice that $s$ is $2/5$ permutation fair.
+We start with the string
+\begin{equation*}
+s_5 = \texttt{abcdeedcba}.
+\end{equation*}
+Notice that $s$ is $2/5$ permutation fair.
 
 \vfill
 
-As per Theorem \ref{relabelling},  if $\sigma$ is a permutation on the characters $(\texttt{a}, \texttt{b},\texttt{c},\texttt{d},\texttt{e})$ then $\sigma(s)$ is $2/5$ permutation fair as well.
+%As per Theorem \ref{relabelling},  if $\sigma$ is a permutation on the characters $(\texttt{a}, \texttt{b},\texttt{c},\texttt{d},\texttt{e})$ then $\sigma(s)$ is $2/5$ permutation fair as well.
+%
+%\vfill
 
-\vfill
-
-If we can find a family of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that $\sigma_1(s) \Vert \sigma_2(s) \Vert \ldots \Vert \sigma_k(s)$ is $3/5$ permutation fair. 
+If we can find a family of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s_5)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that if
+\begin{equation*}
+t_5 = \sigma_1(s_5) \Vert \sigma_2(s_5) \Vert \ldots \Vert \sigma_k(s_5)
+\end{equation*}
+is $3/5$ permutation fair. 
 \end{frame}
 
 \begin{frame}[triangle=siiblue]
@@ -405,11 +414,11 @@ It turns out that we can find such a family:
 
 \begin{frame}[triangle=siiblue]
 \frametitle{Turning the Crank}
-If we let $t$ = $\sigma_1(s) \Vert \sigma_2(s) \Vert \sigma_3(s) \Vert \sigma_4(s) \Vert \sigma_5(s) \Vert \sigma_6(s)$ then $t$ is the string representation of a set of five 12-sided dice which are $3/5$ permutation fair. 
+If we let $t_5$ = $\sigma_1(s_5) \Vert \sigma_2(s_5) \Vert \ldots \Vert \sigma_6(s_5)$ then $t_5$ is the string representation of a set of five 12-sided dice which are $3/5$ permutation fair. 
 
 \vfill
 
-Guided by Conjecture \ref{lift_34}, we guess that $u = t \Vert t'$ represents a set of five 24-sided dice that are $4/5$ permutation fair.
+Guided by Conjecture \ref{lift_34}, we guess that $u = t_5 \Vert t_5'$ represents a set of five 24-sided dice that are $4/5$ permutation fair.
 
 \vfill
 
@@ -434,9 +443,61 @@ v = \bigparallel_{\sigma \in S_5} \sigma(u).
 \vfill
 
 This results in a string that represents a set of five 2880-sided dice that are 5/5 permutation fair.
-
 \end{frame}
 
+%\subsubsection{$n=6$}
+\begin{frame}[triangle=siiblue]
+\frametitle{Tackling $n=6$}
+We start with the string
+\begin{equation*}
+s_6 = \texttt{abcdeffedcba}.
+\end{equation*}
+Notice that $s_6$ is $2/6$ permutation fair.
+
+\vfill
+
+If we can find a family of permutations $\{\sigma_i\}_{i=1}^k$ such that $\sum_{i=1}^k (\mathbf{x})_{\sigma_i(s_6)}$ is constant for all $\mathbf{x}$ with $|\mathbf{x}| = 3$, then Theorem \ref{lifting} implies that if
+\begin{equation*}
+t_6 = \sigma_1(s_6) \Vert \sigma_2(s_6) \Vert \ldots \Vert \sigma_k(s_6)
+\end{equation*}
+then $t_6$ is $3/6$ permutation fair. 
+\end{frame}
+
+\begin{frame}[triangle=siiblue]
+\frametitle{Another Family of Permutations}
+It turns out that we can find such a family:
+\vfill
+\begin{align*}
+	\sigma_1 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f}
+		\end{pmatrix}
+	\qquad
+	\sigma_4 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{a} & \texttt{d} & \texttt{c} & \texttt{b} & \texttt{f} & \texttt{e}
+		\end{pmatrix} \\ \\
+	\sigma_2 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{e} & \texttt{c} & \texttt{b} & \texttt{d} & \texttt{f} & \texttt{a}
+		\end{pmatrix}
+	\qquad
+	\sigma_5 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{e} & \texttt{d} & \texttt{b} & \texttt{c} & \texttt{a} & \texttt{f}
+		\end{pmatrix} \\ \\
+	\sigma_3 &= \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{f} & \texttt{b} & \texttt{d} & \texttt{c} & \texttt{e} & \texttt{a}
+		\end{pmatrix}
+	\qquad
+	\sigma_6 = \begin{pmatrix}
+		\texttt{a} & \texttt{b} & \texttt{c} & \texttt{d} & \texttt{e} & \texttt{f} \\
+		\texttt{f} & \texttt{c} & \texttt{d} & \texttt{b} & \texttt{a} & \texttt{e}
+		\end{pmatrix} \\
+\end{align*}
+
+\end{frame}
 \section{Future Work}
 \begin{frame}[Triangle=siiorange]
 	\tocpage
