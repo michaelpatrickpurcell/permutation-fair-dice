@@ -116,8 +116,8 @@ score_orders2(test, k)
 # # dice_names = ["D%i" % i for i in range(n)]
 # dice_names = "abcdefghijklmnopqrs"
 
-n = 7
-dice_names = "abcdefg"  # hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"
+n = 19
+dice_names = "abcdefghijklmnopqrs"  # tuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"
 
 dice_pairs = list(permutations(dice_names, 2))
 d = 3
@@ -160,7 +160,6 @@ mask_index = sorted([x for x in set(np.arange(1, n) ** 2 % n)])
 mask = [1 if (i + 1) in mask_index else 0 for i in range(n - 1)]
 temp = [score if mask[i] else d ** 2 - score for i in range(n - 1)]
 S = [[temp[(j - i) % (n - 1)] for j in range(n - 1)] for i in range(n)]
-# scores = {p: s for p, s in zip(dice_pairs, sum(S, []))}
 scores = {p: s for p, s in zip(dice_pairs, sum(S, [])) if s == score}
 
 target_constraints = []
