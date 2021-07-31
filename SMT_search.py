@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 from pysmt.shortcuts import Symbol, Int, get_model
 from pysmt.shortcuts import And, Or
@@ -111,9 +112,12 @@ score_orders2(test, k)
 
 # ============================================================================
 
-n = 19
-# dice_names = ["D%i" % i for i in range(n)]
-dice_names = "abcdefghijklmnopqrs"
+# n = 19
+# # dice_names = ["D%i" % i for i in range(n)]
+# dice_names = "abcdefghijklmnopqrs"
+
+n = 7
+dice_names = "abcdefg"  # hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"
 
 dice_pairs = list(permutations(dice_names, 2))
 d = 3
@@ -132,6 +136,10 @@ indicator_domains = And(
 accumulator = [
     [Symbol(x + "%i_acc" % i, INT) for i in range(n * d)] for x in sorted(dice_names)
 ]
+accumulator_domains = And(
+    [And([And(GE(x, Int(0)), LE(x, Int(d))) for x in indicator[i]]) for i in range(n)]
+)
+
 constraint = [
     [Equals(accumulator[i][j], Plus(indicator[i][: j + 1])) for j in range(n * d)]
     for i in range(n)
@@ -140,26 +148,6 @@ constraint = [
 accumulators = [accumulator]
 constraints = [constraint]
 row_luts = [row_lut]
-
-for m in range(2, k + 1):
-    keys = sorted(list(permutations(sorted(dice_names), m)))
-    row_lut = {x: i for i, x in enumerate(keys)}
-    accumulator = []
-    constraint = []
-    for i, x in enumerate(keys):
-        mask = indicator[row_luts[0][x[-1:]]]
-        j = row_luts[-1][x[:-1]]
-        temp = [accumulators[-1][j][jj] * mask[jj] for jj in range(n * d)]
-        accumulator.append(
-            [Symbol("".join(x) + "%i_acc" % jj, INT) for jj in range(n * d)]
-        )
-        constraint.append(
-            [Equals(accumulator[i][jj], Plus(temp[: jj + 1])) for jj in range(n * d)]
-        )
-    accumulators.append(accumulator)
-    constraints.append(constraint)
-    row_luts.append(row_lut)
-
 
 indicator_columns = [[indicator[i][jj] for i in range(n)] for jj in range(n * d)]
 indicator_constraints = And(
@@ -179,9 +167,14 @@ target_constraints = []
 target_vars = [x[-1] for x in accumulators[0]]
 target_val = d
 target_constraints.append(And([Equals(x, Int(target_val)) for x in target_vars]))
-for key,target_val in scores.items():
-    target_var = accumulators[1][row_luts[1][key]][-1]
-    target_constraints.append(GE(target_var, Int(target_val)))
+for key, target_val in scores.items():
+    i, j = row_lut[key[:1]], row_lut[key[-1:]]
+    target_constraints.append(
+        GE(
+            Plus([Times(accumulator[i][jj], indicator[j][jj]) for jj in range(n * d)]),
+            Int(target_val),
+        )
+    )
 target_constraints = And(target_constraints)
 
 
@@ -189,6 +182,7 @@ problem_constraints = And(sum(sum(constraints, []), []))
 formula = And(
     indicator_domains,
     indicator_constraints,
+    accumulator_domains,
     problem_constraints,
     target_constraints,
     symmetry_constraints,
