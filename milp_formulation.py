@@ -109,10 +109,10 @@ for i, key in enumerate(prob.constraints.keys()):
 
 # ============================================================================
 
-word_1 = "abcde"
+word_1 = "abc"
 n = len(word_1)
 k = 3
-# m = 12
+m = 12
 word_2 = word_1 + word_1[::-1]
 all_perms = list(permutations(range(n)))
 all_orders = list(permutations(word_1, k))
@@ -123,16 +123,18 @@ ncounts = [normalize_score(ct) for ct in counts]
 target = 0.0
 
 xs = [
-    pulp.LpVariable("x%i" % i, 0, 1, cat="Integer") for i in tqdm(range(len(all_perms)))
+    pulp.LpVariable("x%i" % i, lowBound=0, upBound=m, cat="Integer")
+    for i in tqdm(range(len(all_perms)))
 ]
 
 prob = pulp.LpProblem("myProblem", pulp.LpMinimize)
 prob += pulp.lpSum(xs)  # This is the objective!
 for order in tqdm(all_orders):
     prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, ncounts)]) == target
-prob += xs[0] == 1
+prob += xs[0] >= 1
 
 status = prob.solve()
+
 print("Values of variables")
 for p, x in zip(all_perms, xs):
     print("%s: %s" % (p, pulp.value(x)))
