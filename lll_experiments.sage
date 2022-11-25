@@ -37,7 +37,7 @@ def permute_letters(string, permutation, relative=True):
     subs_string = "".join([subs[s] for s in string])
     return subs_string
 
-def find_concat_words(words, k, verbose=False):
+def find_concat_words(words, k, noise_params=None, verbose=False):
   letters = sorted(list(set(words[0])))
   scores_lists = []
   word_perms = []
@@ -55,12 +55,10 @@ def find_concat_words(words, k, verbose=False):
         word_perms.append((word, perm))
 
   M = np.array(scores_lists)
-  n1 = M.shape[0]
-  n2 = M.shape[1]
-
   row_sums = M.sum(1, keepdims=True)
+  M_prime = M.shape[1] * M - row_sums
 
-  A = Matrix(ZZ, n1,n2, int(n2) * M - row_sums)
+  A = Matrix(ZZ, M_prime.shape[0], M_prime.shape[1], M_prime)
 
   if verbose:
     print("Computing kernel")
@@ -68,16 +66,27 @@ def find_concat_words(words, k, verbose=False):
   C = A.left_kernel()
   D = C.basis_matrix()
 
+  if noise_params is not None:
+    n3, sigma, rho = noise_params
+    cov = np.ones((D.nrows(),D.nrows()))
+    mask = ~np.eye(D.nrows(), dtype=np.bool)
+    cov[mask] *= rho
+    cov *= sigma^2
+    Z = np.round(scipy.stats.multivariate_normal.rvs(cov=cov, size=int(n3))).astype(np.int).transpose()
+    D_prime = np.column_stack((D, Z))
+  else:
+    D_prime = np.matrix(D)
+
+
   if verbose:
     print("Finding reduced basis")
 
-  reduced_basis = np.matrix(D.LLL())
+  reduced_basis = np.matrix(Matrix(ZZ, D_prime.shape[0], D_prime.shape[1], D_prime).LLL())
 
   concat_words = []
   for basis_vector in reduced_basis:
     temp = np.array(basis_vector)
-    print(temp)
-    if np.all(basis_vector >= 0):
+    if np.all(basis_vector[:D.ncols()] >= 0):
       if verbose:
         print(temp)
       concat_word = ""
@@ -91,93 +100,10 @@ def find_concat_words(words, k, verbose=False):
 
 #############################################################################
 
-letters = "abcde"
+letters = "abcdef"
 word2 = letters + letters[::-1]
 word3s = find_concat_words([word2], 3, verbose=True)
 word3bs = sum([[word, word[::-1]] for word in word3s], [])
 word4s = find_concat_words(word3bs, 4, verbose=True)
 word4bs = sum([[word, word[::-1]] for word in word4s], []) + [word + word[::-1] for word in word3s]
 word5s = find_concat_words(word4bs, 5, verbose=True)
-
-letters = "abcdefg"
-word2 = letters + letters[::-1]
-k = 3
-
-scores_lists = []
-perms = []
-
-print("Building scores matrix")
-for i,perm in enumerate(permutations(range(len(letters)))):
-  temp_word = permute_letters(word2, perm)
-  scores_dict = score_orders2(temp_word, int(k))
-  scores_list = tuple(zip(*sorted(scores_dict.items())))[1]
-  if not (scores_list in scores_lists):
-    scores_lists.append(scores_list)
-    perms.append(perm)
-
-
-M = np.array(scores_lists)
-n1 = M.shape[0]
-n2 = M.shape[1]
-
-row_sums = M.sum(1, keepdims=True)
-
-A = Matrix(ZZ, n1,n2, int(n2) * M - row_sums)
-
-print("Computing kernel")
-C = A.left_kernel()
-D = C.basis_matrix()
-
-print("Finding reduced basis")
-reduced_basis = np.matrix(D.LLL())
-
-for basis_vector in reduced_basis:
-  if (np.all(basis_vector >= 0) or np.all(basis_vector <= 0)):
-    temp = np.array(basis_vector)
-    print(temp)
-    word3 = ""
-    for i,perm in enumerate(perms):
-      for j in range(temp[0][i]):
-        word3 += permute_letters(word2, perm)
-    print(word3)
-
-
-
-k = 4
-
-scores_lists = []
-perms = []
-
-print("Building scores matrix")
-for i,perm in enumerate(permutations(range(len(letters)))):
-  temp_word = permute_letters(word3, perm)
-  scores_dict = score_orders2(temp_word, int(k))
-  scores_list = tuple(zip(*sorted(scores_dict.items())))[1]
-  if not (scores_list in scores_lists):
-    scores_lists.append(scores_list)
-    perms.append(perm)
-
-M = np.array(scores_lists)
-n1 = M.shape[0]
-n2 = M.shape[1]
-
-row_sums = M.sum(1, keepdims=True)
-
-A = Matrix(ZZ, n1,n2, int(n2) * M - row_sums)
-
-print("Computing kernel")
-C = A.left_kernel()
-D = C.basis_matrix()
-
-print("Finding reduced basis")
-reduced_basis = np.matrix(D.LLL())
-
-for basis_vector in reduced_basis:
-  if (np.all(basis_vector >= 0) or np.all(basis_vector <= 0)):
-    temp = np.array(basis_vector)
-    print(temp)
-    word4 = ""
-    for i,perm in enumerate(perms):
-      for j in range(temp[0][i]):
-        word4 += permute_letters(word3, perm)
-        print(word4)

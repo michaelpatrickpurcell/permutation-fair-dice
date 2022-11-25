@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{Prior Art}{2}{0}{1}
+\beamer@sectionintoc {2}{My Contributions}{8}{0}{2}
+\beamer@subsectionintoc {2}{1}{Terminology and Notation}{9}{0}{2}
+\beamer@subsectionintoc {2}{2}{Preliminary Results}{15}{0}{2}
+\beamer@subsectionintoc {2}{3}{New Contstructions}{27}{0}{2}
+\beamer@sectionintoc {3}{Future Work}{33}{0}{3}
+\beamer@sectionintoc {4}{References}{34}{0}{4}
