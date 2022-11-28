@@ -1,48 +1,39 @@
 \documentclass[aspectratio=169]{beamer}
 
 \usetheme{sii}
-%\usepackage{cmbright}
-\usepackage{arev}
-%\usepackage{kerkis}
-%
-
-\setsansfont{Bitstream Vera Sans}
-\newfontfamily\vera{Bitstream Vera Sans}
-\setbeamerfont{title}{size=\Huge, family=\vera}
-\setbeamerfont{frametitle}{size=\huge, family=\vera}
-
-\setmonofont{Bitstream Vera Sans Mono}
+\usepackage[professionalfonts]{arevmath}
+\setmonofont{Courier Prime}%{Tex Gyre Cursor-Bold}%{Bitstream Vera Sans Mono}
 
 \usepackage[thicklines]{cancel}
 \renewcommand{\CancelColor}{\color{siiblue}}
 \usepackage{stmaryrd}
 \usepackage[theorems]{tcolorbox}
 \newtcbtheorem[use counter=theorem]{siitheorem}%
-  {Theorem}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Theorem}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{theorem}
 
 \newtcbtheorem[use counter=theorem]{siiproposition}%
-  {Proposition}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Proposition}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
 \newtcbtheorem[use counter=theorem]{siilemma}%
-  {Lemma}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Lemma}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
 \newtcbtheorem[use counter=theorem]{siicorollary}%
-  {Corollary}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Corollary}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
 \newtcbtheorem[use counter=theorem]{siiconjecture}%
-  {Conjecture}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Conjecture}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
 \newtcbtheorem[use counter=theorem]{siidefinition}%
-  {Definition}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Definition}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=siibrown, colbacktitle=white, coltitle=siiorange}{definition}
 
 \newtcbtheorem{siiproof}%
-  {Proof}{fonttitle=\upshape\large, fontupper=\slshape,
+  {Proof}{fonttitle=\upshape\Large, fontupper=\slshape,
     colback=white, colframe=white, colbacktitle=white, coltitle=siiorange}{definition}
 
 
