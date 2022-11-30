@@ -76,7 +76,6 @@ def find_concat_words(words, k, verbose=False):
   concat_words = []
   for basis_vector in reduced_basis:
     temp = np.array(basis_vector)
-    print(temp)
     if np.all(basis_vector >= 0):
       if verbose:
         print(temp)
