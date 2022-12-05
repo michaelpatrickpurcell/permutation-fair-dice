@@ -39,6 +39,7 @@
 
 \usepackage{booktabs}
 \usepackage{multirow}
+%\usepackage{subdepth}
 
 \title{Permutation Fair Dice}
 \author{Michael Purcell}
@@ -113,7 +114,7 @@ Notice that for a set $S$ of $n$ $m_s$-sided dice to be permutation fair,  the n
 
 \vfill
 
-That is, we must have $n! \ \vert \ m_s^n$.
+That is, we must have $n! \ \vert \ m_s^{n}$.
 
 \vfill
 
@@ -222,11 +223,11 @@ We will write $(\mathbf{x})_s$ to denote the number of times that that the patte
 \vfill
 
 \begin{siilemma}[label=perm_fair_counts]{}{}
-Let $S$ be a set of $n$ $m_s$-sided dice with string representation $s$.  $S$ is $\ell/n$ permutation fair if and only if
+Let $S$ be a set of $n$ $m_s$-sided dice with string representation $s$.  $S$ is $\ell/n$ permutation fair if and only if for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = \ell$ we have
 \begin{equation*}
-(\mathbf{x})_s = \frac{m_s^\ell}{\ell!}.
+(\mathbf{x})_s = \frac{m_s^{\ell}}{\ell!}.
 \end{equation*}
-for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = \ell$.
+%for all $\mathbf{x} \subset s$ with $|\mathbf{x}| = \ell$.
 \end{siilemma}
 \end{frame}
 
