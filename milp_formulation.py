@@ -19,7 +19,7 @@ from utils import rotl
 # ----------------------------------------------------------------------------
 
 
-def milp_search(word, order_len, solution_len=None, verbose=False):
+def milp_search_concatenate(word, order_len, solution_len=None, verbose=False):
     letters = "".join(sorted(list(set(word))))
     n = len(letters)
     all_perms = list(permutations(range(n)))
@@ -53,33 +53,45 @@ def milp_search(word, order_len, solution_len=None, verbose=False):
     if status == -1:
         ret = None
     else:
-        used_perms = [p for p, x in zip(all_perms, xs) if pulp.value(x) == 1.0]
+        print([pulp.value(x) for x in xs])
+        used_perms = [p for p, x in zip(all_perms, xs) if pulp.value(x) > 0.0]
+        multipliers = [int(pulp.value(x)) for x in xs if pulp.value(x) > 0.0]
         segments = [permute_letters(word, p) for p in used_perms]
-        ret = used_perms, segments
+        # ret = used_perms, segments
+        ret = "".join([m * s for m, s in zip(multipliers, segments)])
 
     return ret
 
 
 # ============================================================================
 
-letters = "abcdefg"
-word_2 = letters + letters[::-1]
+letters = "abc"
+word2 = letters + letters[::-1]
 
-search_results = milp_search(word_2, 3, verbose=True)
-if search_results:
-    used_perms, segments_3 = search_results
-    word_3 = "".join(segments_3)
+word3 = milp_search_concatenate(word2, 3, solution_len=6, verbose=True)
 
-search_results = milp_search(word_3, 4, verbose=True)
-if search_results:
-    used_perms, segments_4 = search_results
-    word_4 = "".join(segments_4)
+# search_result = milp_search_concatenate(word2, 3, verbose=True)
+# if search_results:
+#     used_perms, segments_3 = search_results
+#     word3 = "".join(segments_3)
+
+word4 = word3 + word3[::-1]
+
+word5 = milp_search_concatenate(word4, 5, solution_len=10, verbose=True)
+
+# word4 = milp_search_concatenate(word3, 4, verbose=True)
+# search_results = milp_search_concatenate(word3, 4, solution_len=10, verbose=True)
+# if search_results:
+#     used_perms, segments_4 = search_results
+#     word4 = "".join(segments_4)
 
 # word_4b = "".join([permute_letters(word_4, rotl((0, 1, 2, 3, 4), i)) for i in range(5)])
 # segments_4b = ["".join(rotl(segments_4, i)) for i in range(6)]
 # word_4b = "".join(segments_4b)
 
-search_results = milp_search(word_4, order_len=5, solution_len=15, verbose=True)
+search_results = milp_search_concatenate(
+    word_4, order_len=5, solution_len=15, verbose=True
+)
 if search_results:
     used_perms, segments_5 = search_results
     word_5 = "".join(segments_5)
