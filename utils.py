@@ -1,7 +1,8 @@
 import numpy as np
 
 from tqdm import tqdm
-from itertools import combinations, permutations, product
+from itertools import combinations, permutations, product, accumulate
+
 
 def max_norm(score):
     return max([abs(score[x]) for x in score])
@@ -110,26 +111,58 @@ def score_orders(word, k, verbose=False):
 def score_orders2(word, k, verbose=False):
     l = len(word)
     dice_names = sorted(list(set(word)))
-    row_lut = {(x,):i for i,x in enumerate(dice_names)}
+    row_lut = {(x,): i for i, x in enumerate(dice_names)}
     n = len(dice_names)
-    indicator = np.zeros((n,l), dtype=np.int)
-    for i,x in enumerate(word):
-        indicator[row_lut[(x,)],i] = True
+    indicator = np.zeros((n, l), dtype=np.int)
+    for i, x in enumerate(word):
+        indicator[row_lut[(x,)], i] = True
     accumulator = np.cumsum(indicator, axis=1)
     accumulators = [accumulator]
     row_luts = [row_lut]
-    for m in range(2,k+1):
+    for m in range(2, k + 1):
         keys = sorted(list(permutations(dice_names, m)))
-        row_lut = {x:i for i,x in enumerate(keys)}
+        row_lut = {x: i for i, x in enumerate(keys)}
         accumulator = np.zeros((len(keys), l), dtype=np.int)
-        for i,x in enumerate(keys):
+        for i, x in enumerate(keys):
             mask = indicator[row_luts[0][x[-1:]]]
             j = row_luts[-1][x[:-1]]
             accumulator[i] = np.cumsum(accumulators[-1][j] * mask)
         row_luts.append(row_lut)
         accumulators.append(accumulator)
-    ret = {x:accumulators[-1][row_luts[-1][x]][-1] for x in keys}
+    ret = {x: accumulators[-1][row_luts[-1][x]][-1] for x in keys}
     return ret
+
+
+def score_orders3(word, k, verbose=False):
+    l = len(word)
+    dice_names = sorted(list(set(word)))
+    row_lut = {(x,): i for i, x in enumerate(dice_names)}
+    n = len(dice_names)
+    indicator = [[0 for i in range(l)] for j in range(n)]
+    # indicator = np.zeros((n, l), dtype=np.uint64)
+    for i, x in enumerate(word):
+        indicator[row_lut[(x,)]][i] = True
+    accumulator = [list(accumulate(indicator[j])) for j in range(n)]
+    # accumulator = np.cumsum(indicator, axis=1)
+    accumulators = [accumulator]
+    row_luts = [row_lut]
+    for m in range(2, k + 1):
+        keys = sorted(list(permutations(dice_names, m)))
+        row_lut = {x: i for i, x in enumerate(keys)}
+        accumulator = [[0 for i in range(l)] for j in range(len(keys))]
+        # accumulator = np.zeros((len(keys), l), dtype=np.uint64)
+        for i, x in enumerate(keys):
+            mask = indicator[row_luts[0][x[-1:]]]
+            j = row_luts[-1][x[:-1]]
+            temp = [int(a) * int(m) for a, m in zip(accumulators[-1][j], mask)]
+            accumulator[i] = list(
+                accumulate(temp)
+            )  # np.cumsum(accumulators[-1][j] * mask)
+        row_luts.append(row_lut)
+        accumulators.append(accumulator)
+    ret = {x: accumulators[-1][row_luts[-1][x]][-1] for x in keys}
+    return ret
+
 
 def aggregate_scores(*args):
     aggregator = dict()
@@ -148,9 +181,7 @@ def normalize_score(score):
     return normalized_score
 
 
-def coverage_search(
-    word, order_len, norm=l2_norm, roots=[], unique=True, max_len=None
-):
+def coverage_search(word, order_len, norm=l2_norm, roots=[], unique=True, max_len=None):
     m = len(set(word))
     all_perms = list(permutations(range(m)))
 
@@ -202,6 +233,7 @@ def coverage_search(
             break
 
     return used_perms
+
 
 def coverage_search2(
     word, order_len, norm=l2_norm, roots=[], unique=True, max_len=None

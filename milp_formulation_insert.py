@@ -19,7 +19,7 @@ from utils import rotl
 # ----------------------------------------------------------------------------
 
 
-def milp_search_insert(word, upBound=None, palindrome=False, verbose=False):
+def milp_search_insert(word, order_len, upBound=None, palindrome=False, verbose=False):
     letters_list = list(word)
     last_letter = sorted(list(set(letters_list)))[-1]
     new_letter = chr(ord(last_letter) + 1)
@@ -27,6 +27,7 @@ def milp_search_insert(word, upBound=None, palindrome=False, verbose=False):
     n = len(letters)
     all_positions = [i for i in range(len(word) + 1)]
     all_orders = list(permutations(letters, n))
+    short_orders = list(permutations(letters, order_len))
 
     counts = []
     for i in tqdm(all_positions, disable=~verbose):
@@ -42,11 +43,20 @@ def milp_search_insert(word, upBound=None, palindrome=False, verbose=False):
             xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
 
     m = len(word) // (n-1)
-    target = (m**n) // len(all_orders)
+    # target = ((m**n) // factorial(n, exact=True)) * factorial(n-order_len, exact=True) * comb(n, n-order_len, exact=True)
+    target = (m**n) // factorial(order_len, exact=True)
     prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
     prob += pulp.lpSum(xs) == m  # There is no objective for this formulation!
-    for order in tqdm(all_orders):
-        prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) == target
+    # for order in tqdm(all_orders):
+    #     prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) == target
+
+    for short_order in tqdm(short_orders):
+        temp = []
+        for order in all_orders:
+            temp_order = tuple([x for x in order if x in short_order])
+            if short_order == temp_order:
+                temp += [x * ct[order] for x, ct in zip(xs, counts)]
+        prob += pulp.lpSum(temp) == target
 
     if palindrome:
         for i in all_positions:
