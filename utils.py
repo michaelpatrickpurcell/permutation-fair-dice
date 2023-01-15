@@ -4,7 +4,6 @@ from tqdm import tqdm
 from itertools import combinations, permutations, product, accumulate
 
 
-
 def max_norm(score):
     return max([abs(score[x]) for x in score])
 
@@ -131,8 +130,6 @@ def score_orders2(word, k, verbose=False):
         row_luts.append(row_lut)
         accumulators.append(accumulator)
     ret = {x: accumulators[-1][row_luts[-1][x]][-1] for x in keys}
-<<<<<<< HEAD
-=======
     return ret
 
 
@@ -164,7 +161,6 @@ def score_orders3(word, k, verbose=False):
         row_luts.append(row_lut)
         accumulators.append(accumulator)
     ret = {x: accumulators[-1][row_luts[-1][x]][-1] for x in keys}
->>>>>>> 277bcb6343061916edbbf282f885fdd7b7dceba0
     return ret
 
 
