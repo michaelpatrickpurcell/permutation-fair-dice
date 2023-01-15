@@ -19,60 +19,82 @@ from utils import rotl
 # ----------------------------------------------------------------------------
 
 
-def milp_search_insert(word, order_len, upBound=None, palindrome=False, verbose=False):
+def milp_search_insert(
+    word,
+    order_len,
+    solution_len=None,
+    upBound=None,
+    palindrome=False,
+    positions=None,
+    verbose=False,
+):
     letters_list = list(word)
     last_letter = sorted(list(set(letters_list)))[-1]
     new_letter = chr(ord(last_letter) + 1)
     letters = "".join(sorted(list(set(letters_list))) + [new_letter])
     n = len(letters)
-    all_positions = [i for i in range(len(word) + 1)]
+    if positions:
+        all_positions = sorted(list(positions))
+    else:
+        all_positions = [i for i in range(len(word) + 1)]
+
     all_orders = list(permutations(letters, n))
     short_orders = list(permutations(letters, order_len))
 
     counts = []
     for i in tqdm(all_positions, disable=~verbose):
         temp = list(word)
-        temp.insert(i,new_letter)
+        temp.insert(i, new_letter)
         counts.append(score_orders2(temp, n))
 
     xs = []
     for i in tqdm(all_positions, disable=~verbose):
         if upBound:
-            xs.append(pulp.LpVariable("x%i" % i, lowBound=0, upBound=upBound, cat="Integer"))
+            xs.append(
+                pulp.LpVariable("x%i" % i, lowBound=0, upBound=upBound, cat="Integer")
+            )
         else:
             xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
 
-    m = len(word) // (n-1)
-    # target = ((m**n) // factorial(n, exact=True)) * factorial(n-order_len, exact=True) * comb(n, n-order_len, exact=True)
-    target = (m**n) // factorial(order_len, exact=True)
-    prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
-    prob += pulp.lpSum(xs) == m  # There is no objective for this formulation!
-    # for order in tqdm(all_orders):
-    #     prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) == target
+    m = len(word) // (n - 1)
+    if solution_len is None:
+        solution_len = m
 
-    for short_order in tqdm(short_orders):
+    # target = ((m**n) // factorial(n, exact=True)) * factorial(n-order_len, exact=True) * comb(n, n-order_len, exact=True)
+    # target = (m**n) // factorial(order_len, exact=True)
+    target = (
+        comb(n, n - order_len, exact=True)
+        * factorial(n - order_len, exact=True)
+        * np.mean(list(counts[0].values()))
+        * solution_len
+    )
+
+    prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
+    prob += pulp.lpSum(xs) == solution_len
+
+    for short_order in tqdm(short_orders, disable=~verbose):
         temp = []
-        for order in all_orders:
+        for order in tqdm(all_orders, disable=~verbose):
             temp_order = tuple([x for x in order if x in short_order])
             if short_order == temp_order:
                 temp += [x * ct[order] for x, ct in zip(xs, counts)]
         prob += pulp.lpSum(temp) == target
 
     if palindrome:
-        for i in all_positions:
-            prob += xs[i] == xs[len(word)-i]
+        for x, y in zip(xs, xs[::-1]):
+            prob += x == y
 
     status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
 
     if status == -1:
-        ret = ['']
+        ret = [""]
     else:
         solution = [pulp.value(x) for x in xs]
         ret = list(word)
-        for i in all_positions[::-1]:
-            ret.insert(i, ''.join(int(solution[i])*[new_letter]))
+        for i, mult in zip(all_positions[::-1], solution[::-1]):
+            ret.insert(i, "".join(int(mult) * [new_letter]))
 
-    return ''.join(ret)
+    return "".join(ret)
 
 
 # ============================================================================
@@ -102,22 +124,22 @@ if search_results:
 
 # ============================================================================
 
-seed3 = 'cabbcabaaccbcabbca'
-three_perms = list(permutations([0,1,2], 3))
+seed3 = "cabbcabaaccbcabbca"
+three_perms = list(permutations([0, 1, 2], 3))
 
 hits = []
 for i, perms in enumerate(product(three_perms, repeat=5)):
     print(i)
-    word3 = ''.join([permute_letters(seed3, perm) for perm in perms])
+    word3 = "".join([permute_letters(seed3, perm) for perm in perms])
     word4 = milp_search_insert(word3, palindrome=True, upBound=2)
     if word4:
-        print('hit')
-        print('secondary test')
+        print("hit")
+        print("secondary test")
         word5 = milp_search_insert(word4)
         if word5:
-            print('!!!!!HIT!!!!!')
+            print("!!!!!HIT!!!!!")
             hits.append((word5))
         else:
-            print('so close')
+            print("so close")
     else:
-        print('miss')
+        print("miss")

@@ -26,7 +26,7 @@ def milp_search_concatenate(word, order_len, solution_len=None, verbose=False):
     all_orders = list(permutations(letters, order_len))
 
     counts = []
-    for i, p in enumerate(all_perms):  # tqdm(all_perms, disable=~verbose):
+    for i, p in tqdm(enumerate(all_perms, disable=~verbose)):
         counts.append(score_orders2(permute_letters(word, p), order_len))
 
     xs = []
@@ -38,7 +38,7 @@ def milp_search_concatenate(word, order_len, solution_len=None, verbose=False):
         target = m * sum([int(v) for v in counts[0].values()]) // len(all_orders)
         prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
         prob += pulp.lpSum(xs) == m  # There is no objective for this formulation!
-        for order in tqdm(all_orders):
+        for order in tqdm(all_orders, disable=~verbose):
             prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) <= target
     else:
         ncounts = [normalize_score(ct) for ct in counts]
