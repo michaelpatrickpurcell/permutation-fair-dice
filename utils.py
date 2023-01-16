@@ -3,6 +3,12 @@ import numpy as np
 from tqdm import tqdm
 from itertools import combinations, permutations, product, accumulate
 
+from tqdm import tqdm
+from scipy.special import factorial, comb
+from collections import Counter
+
+import pulp
+
 
 def max_norm(score):
     return max([abs(score[x]) for x in score])
@@ -300,3 +306,235 @@ def coverage_search2(
             break
 
     return used_perms
+
+
+def compute_bigstring_index(dice_names, die, die_index):
+    n = len(dice_names)
+    all_perms = list(permutations(range(n), n))
+    m = len(all_perms)
+    perm_indices = number_to_base(die_index, m)
+    face_index = sum([j * (m ** i) for i, j in enumerate(perm_indices[::-1])])
+    die_index = dice_names.index(die)
+    for i in perm_indices:
+        die_index = all_perms[i].index(die_index)
+    bigstring_index = face_index * n + die_index
+    return bigstring_index
+
+
+def create_bigstring(dice_names):
+    temp = list(dice_names)
+    n = len(dice_names)
+    all_perms = list(permutations(range(n), n))
+    for i in range(n - 1):
+        temp = sum(
+            [[dice_names[p[dice_names.index(x)]] for x in temp] for p in all_perms], []
+        )
+    bigstring = "".join(temp)
+    return bigstring
+
+
+def number_to_base(n, b):
+    if n == 0:
+        return [0]
+    digits = []
+    while n:
+        digits.append(int(n % b))
+        n //= b
+    return digits[::-1]
+
+
+def milp_search_concatenate(word, order_len, solution_len=None, verbose=False):
+    letters = "".join(sorted(list(set(word))))
+    n = len(letters)
+    all_perms = list(permutations(range(n)))
+    all_orders = list(permutations(letters, order_len))
+
+    counts = []
+    for i, p in tqdm(enumerate(all_perms), disable=~verbose):
+        counts.append(score_orders2(permute_letters(word, p), order_len))
+
+    xs = []
+    for i in tqdm(range(len(all_perms)), disable=~verbose):
+        xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
+
+    if solution_len is not None:
+        m = solution_len
+        target = m * sum([int(v) for v in counts[0].values()]) // len(all_orders)
+        prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
+        prob += pulp.lpSum(xs) == m  # There is no objective for this formulation!
+        for order in tqdm(all_orders, disable=~verbose):
+            prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) <= target
+    else:
+        ncounts = [normalize_score(ct) for ct in counts]
+        prob = pulp.LpProblem("myProblem", pulp.LpMinimize)
+        prob += pulp.lpSum(xs)  # This is the objective!
+        for order in tqdm(all_orders, disable=~verbose):
+            prob += pulp.lpSum([x * nct[order] for x, nct in zip(xs, ncounts)]) == 0.0
+        prob += pulp.lpSum(xs) >= 1
+
+    status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+
+    if status == -1:
+        ret = None
+    else:
+        print([pulp.value(x) for x in xs])
+        used_perms = [p for p, x in zip(all_perms, xs) if pulp.value(x) > 0.0]
+        multipliers = [int(pulp.value(x)) for x in xs if pulp.value(x) > 0.0]
+        segments = [permute_letters(word, p) for p in used_perms]
+        # ret = used_perms, segments
+        ret = "".join([m * s for m, s in zip(multipliers, segments)])
+
+    return ret
+
+
+def milp_search_insert(
+    word,
+    order_len,
+    solution_len=None,
+    upBound=None,
+    palindrome=False,
+    positions=None,
+    verbose=False,
+):
+    letters_list = list(word)
+    last_letter = sorted(list(set(letters_list)))[-1]
+    new_letter = chr(ord(last_letter) + 1)
+    letters = "".join(sorted(list(set(letters_list))) + [new_letter])
+    n = len(letters)
+    if positions:
+        all_positions = sorted(list(positions))
+    else:
+        all_positions = [i for i in range(len(word) + 1)]
+
+    all_orders = list(permutations(letters, n))
+    short_orders = list(permutations(letters, order_len))
+
+    counts = []
+    for i in tqdm(all_positions, disable=~verbose):
+        temp = list(word)
+        temp.insert(i, new_letter)
+        counts.append(score_orders2(temp, n))
+
+    xs = []
+    for i in tqdm(all_positions, disable=~verbose):
+        if upBound:
+            xs.append(
+                pulp.LpVariable("x%i" % i, lowBound=0, upBound=upBound, cat="Integer")
+            )
+        else:
+            xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
+
+    m = len(word) // (n - 1)
+    if solution_len is None:
+        solution_len = m
+
+    # target = ((m**n) // factorial(n, exact=True)) * factorial(n-order_len, exact=True) * comb(n, n-order_len, exact=True)
+    # target = (m**n) // factorial(order_len, exact=True)
+    target = (
+        comb(n, n - order_len, exact=True)
+        * factorial(n - order_len, exact=True)
+        * np.mean(list(counts[0].values()))
+        * solution_len
+    )
+
+    prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
+    prob += pulp.lpSum(xs) == solution_len
+
+    for short_order in tqdm(short_orders, disable=~verbose):
+        temp = []
+        for order in tqdm(all_orders, disable=~verbose):
+            temp_order = tuple([x for x in order if x in short_order])
+            if short_order == temp_order:
+                temp += [x * ct[order] for x, ct in zip(xs, counts)]
+        prob += pulp.lpSum(temp) == target
+
+    if palindrome:
+        for x, y in zip(xs, xs[::-1]):
+            prob += x == y
+
+    status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+
+    if status == -1:
+        ret = [""]
+    else:
+        solution = [pulp.value(x) for x in xs]
+        ret = list(word)
+        for i, mult in zip(all_positions[::-1], solution[::-1]):
+            ret.insert(i, "".join(int(mult) * [new_letter]))
+
+    return "".join(ret)
+
+
+def milp_exhaust_binary(m, d, verbose=False):
+    prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
+    xs = []
+    for i in range(m):
+        xs.append(pulp.LpVariable("x%i" % i, lowBound=0, upBound=1, cat="Integer"))
+
+    vec = [2 ** i for i in range(m)]
+    prob += pulp.lpDot(vec, xs)
+
+    if d >= 2:
+        # if (m // 2) != m / 2:
+        #     raise ValueError
+        vec = [1 for i in range(m)]
+        target2 = m // 2
+        prob += pulp.lpDot(vec, xs) == target2
+    if d >= 3:
+        # if (m // 6) != (m / 6):
+        #     raise ValueError
+        vec = [(i + 1) for i in range(m)]
+        target3 = m * (3 * m + 2) // 12
+        prob += pulp.lpDot(vec, xs) == target3
+    if d >= 4:
+        # if (m // 6) != (m / 6):
+        #     assert ValueError
+        vec = [(i + 1) ** 2 for i in range(m)]
+        target4 = (m ** 2 * (m + 1)) // 6
+        prob += pulp.lpDot(vec, xs) == target4
+    if d >= 5:
+        # if (m // 30) != (m / 30):
+        #     raise ValueError
+        vec = [(i + 1) ** 3 for i in range(m)]
+        target5 = (m * (5 * (m ** 2) * (3 * m + 4) - 4)) // 120
+        # target5 = m * (5 * m * (m * (3 * m - 8) + 6) - 4) // 120
+        prob += pulp.lpDot(vec, xs) == target5
+
+    status = 1
+    solutions = []
+    while status != -1:
+        status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+        if status == -1:
+            pass
+        else:
+            solution = [pulp.value(x) for x in xs]
+            solutions.append(solution)
+            vec = [2 ** i for i in range(m)]
+            target = pulp.lpDot(vec, solution) - 1
+            prob += pulp.lpDot(vec, xs) <= target
+
+    return solutions
+
+
+# In [5]: for i, (x,y,z) in enumerate(product(set2, set3, set4)):
+#    ...:     if i % 2**10 == 0:
+#    ...:         print(i)
+#    ...:     m = len(x)
+#    ...:     s1 = 3*np.ones(m, dtype=int)
+#    ...:     s2 = 2*np.array(x, dtype=int) + 2
+#    ...:     s3 = 4*np.array(y, dtype=int) + 1
+#    ...:     s4 = 6*np.array(z, dtype=int)
+#    ...:     array = np.row_stack([s1,s2,s3,s4])
+#    ...:     word = array_to_word(array, 'abcd')
+#    ...:     scores = score_orders2(word, 4)
+#    ...:     if len(set(scores.values())) == 1:
+#    ...:         print(word)
+#    ...:
+
+
+def array_to_word(array, letters):
+    letter_dict = {l: i for i, l in enumerate(letters)}
+    ret = []
+    for j in range(array.shape[1]):
+        ret += sorted(letters, key=lambda l: array[letter_dict[l], j])
+    return "".join(ret)
