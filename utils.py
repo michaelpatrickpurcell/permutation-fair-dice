@@ -466,13 +466,16 @@ def milp_search_insert(
 
 
 def milp_exhaust_binary(m, d, verbose=False):
-    prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
+    prob = pulp.LpProblem("myProblem", pulp.LpMinimize)
     xs = []
     for i in range(m):
         xs.append(pulp.LpVariable("x%i" % i, lowBound=0, upBound=1, cat="Integer"))
 
-    vec = [2 ** i for i in range(m)]
-    prob += pulp.lpDot(vec, xs)
+    # vec = [2**i for i in range(m)]
+    # print(vec)
+    # temp = pulp.lpDot(vec, xs)
+    # print(temp)
+    # prob += temp
 
     if d >= 2:
         # if (m // 2) != m / 2:
@@ -502,16 +505,24 @@ def milp_exhaust_binary(m, d, verbose=False):
 
     status = 1
     solutions = []
-    while status != -1:
-        status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
-        if status == -1:
-            pass
-        else:
-            solution = [pulp.value(x) for x in xs]
-            solutions.append(solution)
-            vec = [2 ** i for i in range(m)]
-            target = pulp.lpDot(vec, solution) - 1
-            prob += pulp.lpDot(vec, xs) <= target
+    # while status != -1:
+    #     status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+    #     if status == -1:
+    #         pass
+    #     else:
+    #         solution = [pulp.value(x) for x in xs]
+    #         solutions.append(solution)
+    #         vec = [2 ** i for i in range(m)]
+    #         target = pulp.lpDot(vec, solution) + 1
+    #         print(target)
+    #         prob += pulp.lpDot(vec, xs) >= target
+
+    status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+    if status == -1:
+        pass
+    else:
+        solution = [pulp.value(x) for x in xs]
+        solutions.append(solution)
 
     return solutions
 
@@ -532,9 +543,67 @@ def milp_exhaust_binary(m, d, verbose=False):
 #    ...:
 
 
+def bits_to_array(bits, m):
+    n = (len(bits) // m) + 1
+    temp = bits.reshape(n - 1, m)
+    row0 = (n - 1) * np.ones(m, dtype=int)
+    rows = [2 * (i + 1) * temp[i] + (n - i - 2) for i in range(n - 1)]
+    array = np.row_stack([row0] + rows)
+    return array
+
+
 def array_to_word(array, letters):
     letter_dict = {l: i for i, l in enumerate(letters)}
     ret = []
     for j in range(array.shape[1]):
         ret += sorted(letters, key=lambda l: array[letter_dict[l], j])
     return "".join(ret)
+
+
+def is_gofirst_fair(word):
+    letters = set(word)
+    n = len(letters)
+    scores = score_orders2(word, n)
+    target = sum(scores.values()) // n
+    ret = True
+    for letter in letters:
+        check = sum([v for k, v in scores.items() if k[-1] == letter])
+        if check != target:
+            ret = False
+            break
+    return ret
+
+
+def is_place_fair(word):
+    letters = set(word)
+    n = len(letters)
+    scores = score_orders2(word, n)
+    target = sum(scores.values()) // n
+    ret = True
+    for i in range(n):
+        for letter in letters:
+            check = sum([v for k, v in scores.items() if k[i] == letter])
+            if check != target:
+                ret = False
+                break
+        if not ret:
+            break
+    return ret
+
+
+def is_permutation_fair(word):
+    letters = set(word)
+    n = len(letters)
+    scores = score_orders2(word, n)
+    ret = len(set(scores.values())) == 1
+    return ret
+
+
+def expand_to_lcm(s):
+    c = Counter(s)
+    lcm = math.lcm(*c.values())
+    t = []
+    for x in s:
+        t.append(x * (lcm // c[x]))
+
+    return "".join(t)
