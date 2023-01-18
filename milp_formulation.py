@@ -19,50 +19,6 @@ from utils import rotl
 # ----------------------------------------------------------------------------
 
 
-def milp_search_concatenate(word, order_len, solution_len=None, verbose=False):
-    letters = "".join(sorted(list(set(word))))
-    n = len(letters)
-    all_perms = list(permutations(range(n)))
-    all_orders = list(permutations(letters, order_len))
-
-    counts = []
-    for i, p in tqdm(enumerate(all_perms, disable=~verbose)):
-        counts.append(score_orders2(permute_letters(word, p), order_len))
-
-    xs = []
-    for i in tqdm(range(len(all_perms)), disable=~verbose):
-        xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
-
-    if solution_len is not None:
-        m = solution_len
-        target = m * sum([int(v) for v in counts[0].values()]) // len(all_orders)
-        prob = pulp.LpProblem("myProblem", pulp.LpMaximize)
-        prob += pulp.lpSum(xs) == m  # There is no objective for this formulation!
-        for order in tqdm(all_orders, disable=~verbose):
-            prob += pulp.lpSum([x * ct[order] for x, ct in zip(xs, counts)]) <= target
-    else:
-        ncounts = [normalize_score(ct) for ct in counts]
-        prob = pulp.LpProblem("myProblem", pulp.LpMinimize)
-        prob += pulp.lpSum(xs)  # This is the objective!
-        for order in tqdm(all_orders, disable=~verbose):
-            prob += pulp.lpSum([x * nct[order] for x, nct in zip(xs, ncounts)]) == 0.0
-        prob += pulp.lpSum(xs) >= 1
-
-    status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
-
-    if status == -1:
-        ret = None
-    else:
-        print([pulp.value(x) for x in xs])
-        used_perms = [p for p, x in zip(all_perms, xs) if pulp.value(x) > 0.0]
-        multipliers = [int(pulp.value(x)) for x in xs if pulp.value(x) > 0.0]
-        segments = [permute_letters(word, p) for p in used_perms]
-        # ret = used_perms, segments
-        ret = "".join([m * s for m, s in zip(multipliers, segments)])
-
-    return ret
-
-
 # ============================================================================
 
 letters = "abc"
