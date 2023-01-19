@@ -478,29 +478,20 @@ def milp_exhaust_binary(m, d, verbose=False):
     # prob += temp
 
     if d >= 2:
-        # if (m // 2) != m / 2:
-        #     raise ValueError
         vec = [1 for i in range(m)]
         target2 = m // 2
         prob += pulp.lpDot(vec, xs) == target2
     if d >= 3:
-        # if (m // 6) != (m / 6):
-        #     raise ValueError
         vec = [(i + 1) for i in range(m)]
         target3 = m * (3 * m + 2) // 12
         prob += pulp.lpDot(vec, xs) == target3
     if d >= 4:
-        # if (m // 6) != (m / 6):
-        #     assert ValueError
         vec = [(i + 1) ** 2 for i in range(m)]
         target4 = (m ** 2 * (m + 1)) // 6
         prob += pulp.lpDot(vec, xs) == target4
     if d >= 5:
-        # if (m // 30) != (m / 30):
-        #     raise ValueError
         vec = [(i + 1) ** 3 for i in range(m)]
         target5 = (m * (5 * (m ** 2) * (3 * m + 4) - 4)) // 120
-        # target5 = m * (5 * m * (m * (3 * m - 8) + 6) - 4) // 120
         prob += pulp.lpDot(vec, xs) == target5
 
     status = 1
