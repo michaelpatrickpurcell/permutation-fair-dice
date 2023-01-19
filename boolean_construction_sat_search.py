@@ -104,21 +104,22 @@ for solution5 in level_5_generator:
             c2 = c3 + (np.array(solution3) > 0).astype(int)
             level_2_generator = gofirst_search(n, m, 2, c2)
             for solution2 in level_2_generator:
-                print("search hit")
-                solution = solution2 + solution3 + solution4  # + solution5
+                print("search hit %i" % (len(solutions) + 1))
+                solution = solution2 + solution3 + solution4 + solution5
                 solutions.append(solution)
                 bits = (np.array(solution) > 0).astype(int)
                 array = bits_to_array(bits, m)
                 letters = string.ascii_lowercase[:n]
                 word = array_to_word(array, letters)
                 if is_gofirst_fair(word):
-                    print("gofirst hit")
+                    print("  gofirst hit")
                 if is_place_fair(word):
-                    print("place hit")
+                    print("  place hit")
+                    flag = 1
                 if is_permutation_fair(word):
-                    print("permutation hit")
-                flag = 1
-                break
+                    print("  permutation hit")
+                if flag:
+                    break
             if flag:
                 break
         if flag:
