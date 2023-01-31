@@ -11,7 +11,6 @@ import time
 from tqdm import tqdm
 
 from utils import *
-from dimacs_mapping import to_dimacs_formula
 
 # ============================================================================
 
@@ -92,6 +91,9 @@ start_time = time.time()
 
 flag = 0
 solutions = []
+gofirst_hits = []
+place_hits = []
+permutation_hits = []
 c5 = np.zeros(m, dtype=int)
 level_5_generator = gofirst_search(n, m, 5, c5)
 for solution5 in level_5_generator:
@@ -104,20 +106,23 @@ for solution5 in level_5_generator:
             c2 = c3 + (np.array(solution3) > 0).astype(int)
             level_2_generator = gofirst_search(n, m, 2, c2)
             for solution2 in level_2_generator:
-                print("search hit %i" % (len(solutions) + 1))
                 solution = solution2 + solution3 + solution4 + solution5
                 solutions.append(solution)
+                print("search hit %i" % len(solutions))
                 bits = (np.array(solution) > 0).astype(int)
                 array = bits_to_array(bits, m)
                 letters = string.ascii_lowercase[:n]
                 word = array_to_word(array, letters)
                 if is_gofirst_fair(word):
-                    print("  gofirst hit")
+                    gofirst_hits.append(solution)
+                    print("  gofirst hit %i" % len(gofirst_hits))
                 if is_place_fair(word):
-                    print("  place hit")
+                    place_hits.append(solution)
+                    print("  place hit %i" % len(place_hits))
                     flag = 1
                 if is_permutation_fair(word):
-                    print("  permutation hit")
+                    permutation_hits.append(solution)
+                    print("  permutation hit %i" % len(permutation_hits))
                 if flag:
                     break
             if flag:
