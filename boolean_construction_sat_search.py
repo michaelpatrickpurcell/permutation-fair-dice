@@ -7,11 +7,13 @@ from pysat.formula import IDPool
 
 import string
 import time
+import math
 
 from tqdm import tqdm
 
 from utils import *
-from dimacs_mapping import to_dimacs_formula
+
+# from dimacs_mapping import to_dimacs_formula
 
 # ============================================================================
 
@@ -47,11 +49,11 @@ def gofirst_search(n, m, level, c=None):
     lits = [-x for x in xs] + xs
 
     r = np.arange(m, dtype=int)
-    zero_weights = (r ** (n - l)) * (r ** c) * ((r + 1) ** ((l - 1) - c))
-    one_weights = ((r + 1) ** (n - l)) * (r ** c) * ((r + 1) ** ((l - 1) - c))
+    zero_weights = (r ** (n - l)) * (r**c) * ((r + 1) ** ((l - 1) - c))
+    one_weights = ((r + 1) ** (n - l)) * (r**c) * ((r + 1) ** ((l - 1) - c))
     weights = list(zero_weights) + list(one_weights)
 
-    bound = m ** n // n
+    bound = m**n // n
 
     cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
     clauses += cnf.clauses
@@ -59,13 +61,16 @@ def gofirst_search(n, m, level, c=None):
     bounds = [
         m // 2,
         m * (3 * m + 2) // 12,
-        m ** 2 * (m + 1) // 6,
-        m * (5 * m ** 2 * (3 * m + 4) - 4) // 120,
+        m**2 * (m + 1) // 6,
+        m * (5 * m**2 * (3 * m + 4) - 4) // 120,
     ]
     for i, bound in enumerate(bounds[: (level - 1)]):
         lits = xs
-        weights = [j ** i for j, x in enumerate(xs, 1)]
+        weights = [j**i for j, x in enumerate(xs, 1)]
         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
+        # cnf = PBEnc.equals(
+        #     lits=[lits, bound], weights=weights, vpool=vpool, encoding=EncType.native
+        # )
         clauses += cnf.clauses
 
     sat = Minicard()
@@ -180,7 +185,7 @@ clauses = []
 #         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
 #         clauses += cnf.clauses
 
-bound = m ** n // n
+bound = m**n // n
 
 ys = [
     add_indicator_variable("y_%i" % i, ["x_%i_%i" % (n - 2, i)], [0], vpool, clauses)
@@ -213,9 +218,9 @@ for u, v in product([0, 1], repeat=2):
     #     weights += [i * (i + 1) ** (n - 2) for i in range(m)]
 
     if u == 0:
-        weights += [i ** (n - 2) * i ** v * (i + 1) ** (1 - v) for i in range(m)]
+        weights += [i ** (n - 2) * i**v * (i + 1) ** (1 - v) for i in range(m)]
     else:
-        weights += [(i + 1) ** (n - 2) * i ** v * (i + 1) ** (1 - v) for i in range(m)]
+        weights += [(i + 1) ** (n - 2) * i**v * (i + 1) ** (1 - v) for i in range(m)]
 
 cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
 clauses += cnf.clauses
