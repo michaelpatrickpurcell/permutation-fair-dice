@@ -519,22 +519,6 @@ def milp_exhaust_binary(m, d, verbose=False):
     return solutions
 
 
-# In [5]: for i, (x,y,z) in enumerate(product(set2, set3, set4)):
-#    ...:     if i % 2**10 == 0:
-#    ...:         print(i)
-#    ...:     m = len(x)
-#    ...:     s1 = 3*np.ones(m, dtype=int)
-#    ...:     s2 = 2*np.array(x, dtype=int) + 2
-#    ...:     s3 = 4*np.array(y, dtype=int) + 1
-#    ...:     s4 = 6*np.array(z, dtype=int)
-#    ...:     array = np.row_stack([s1,s2,s3,s4])
-#    ...:     word = array_to_word(array, 'abcd')
-#    ...:     scores = score_orders2(word, 4)
-#    ...:     if len(set(scores.values())) == 1:
-#    ...:         print(word)
-#    ...:
-
-
 def bits_to_array(bits, m):
     n = (len(bits) // m) + 1
     temp = bits.reshape(n - 1, m)
