@@ -12,11 +12,6 @@ import math
 from tqdm import tqdm
 
 from utils import *
-<<<<<<< HEAD
-
-# from dimacs_mapping import to_dimacs_formula
-=======
->>>>>>> 675366def28a2bff513257f50513fde2de92f1cc
 
 # ============================================================================
 
@@ -38,138 +33,76 @@ def add_indicator_variable(var_name, source_variable_names, values, vpool, claus
 # ============================================================================
 
 
-def gofirst_search(n, m, level, c=None):
-    vpool = IDPool()
-    xs = [vpool.id("{x}".format(x=i)) for i in range(m)]
-
-    l = n - (level - 1)
-
-    if c is None:
-        c = np.zeros(m, dtype=int)
-
-    clauses = []
-
-    lits = [-x for x in xs] + xs
-
-    r = np.arange(m, dtype=int)
-    zero_weights = (r ** (n - l)) * (r**c) * ((r + 1) ** ((l - 1) - c))
-    one_weights = ((r + 1) ** (n - l)) * (r**c) * ((r + 1) ** ((l - 1) - c))
-    weights = list(zero_weights) + list(one_weights)
-
-    bound = m**n // n
-
-    cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-    clauses += cnf.clauses
-
-    bounds = [
+def build_grime_bounds_clauses(i, m, n, vpool):
+    if n > 5:
+        raise ValueError()
+    grime_bounds = [
         m // 2,
         m * (3 * m + 2) // 12,
         m**2 * (m + 1) // 6,
         m * (5 * m**2 * (3 * m + 4) - 4) // 120,
     ]
-    for i, bound in enumerate(bounds[: (level - 1)]):
-        lits = xs
-        weights = [j**i for j, x in enumerate(xs, 1)]
+    row = ["x_%i_%i" % (i, j) for j in range(m)]
+    grime_bounds_clauses = []
+    for k, bound in enumerate(grime_bounds[: (i + 1)]):
+        # lits = [var_dict[x] for x in row]
+        lits = [vpool.id(x) for x in row]
+        weights = [j**k for j, x in enumerate(row, 1)]
         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-        # cnf = PBEnc.equals(
-        #     lits=[lits, bound], weights=weights, vpool=vpool, encoding=EncType.native
-        # )
-        clauses += cnf.clauses
+        grime_bounds_clauses += cnf.clauses
 
-    sat = Minicard()
-    for clause in clauses:
-        sat.add_clause(clause)
+    return grime_bounds_clauses
 
-    is_solvable = True
-    while is_solvable:
-        is_solvable = sat.solve()
-        if is_solvable:
-            # print("Found a solution.")
-            sat_solution = sat.get_model()[:m]
-            yield sat_solution
-            elimination_clause = [-x for x in sat_solution]
-            sat.add_clause(elimination_clause)
+
+# ============================================================================
+
+
+def build_gofirst_clauses(i, m, n, vpool):
+    if n > 5:
+        raise ValueError()
+
+    gofirst_bound = m**n // n
+
+    lits = []
+    weights = []
+
+    reps = (n - i) - 1
+    for bits in product([0, 1], repeat=reps):
+        for j in range(m):
+            add_indicator_variable(
+                "y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)),
+                # ["x_%i_%i" % (i, j), "x_%i_%i" % (i + 1, j)],
+                ["x_%i_%i" % (i + k, j) for k in range(reps)],
+                bits,
+                vpool,
+                clauses,
+            )
+        lits += [
+            vpool.id("y_%i_%s_%i" % ((i,) + (str(bits),) + (j,))) for j in range(m)
+        ]
+
+        u = bits[0]
+        v = sum(bits[1:])
+        if u == 0:
+            weights += [
+                j ** (i + 1) * j**v * (j + 1) ** (((n - i) - 2) - v) for j in range(m)
+            ]
+        else:
+            weights += [
+                (j + 1) ** (i + 1) * j**v * (j + 1) ** (((n - i) - 2) - v)
+                for j in range(m)
+            ]
+
+    cnf = PBEnc.equals(lits=lits, weights=weights, bound=gofirst_bound, vpool=vpool)
+    gofirst_clauses = cnf.clauses
+
+    return gofirst_clauses
 
 
 # ============================================================================
 
 n = 5
-m = 60
-
-start_time = time.time()
-
-flag = 0
-solutions = []
-gofirst_hits = []
-place_hits = []
-permutation_hits = []
-c5 = np.zeros(m, dtype=int)
-level_5_generator = gofirst_search(n, m, 5, c5)
-for solution5 in level_5_generator:
-    c4 = c5 + (np.array(solution5) > 0).astype(int)
-    level_4_generator = gofirst_search(n, m, 4, c4)
-    for solution4 in level_4_generator:
-        c3 = c4 + (np.array(solution4) > 0).astype(int)
-        level_3_generator = gofirst_search(n, m, 3, c3)
-        for solution3 in level_3_generator:
-            c2 = c3 + (np.array(solution3) > 0).astype(int)
-            level_2_generator = gofirst_search(n, m, 2, c2)
-            for solution2 in level_2_generator:
-                solution = solution2 + solution3 + solution4 + solution5
-                solutions.append(solution)
-                print("search hit %i" % len(solutions))
-                bits = (np.array(solution) > 0).astype(int)
-                array = bits_to_array(bits, m)
-                letters = string.ascii_lowercase[:n]
-                word = array_to_word(array, letters)
-                if is_gofirst_fair(word):
-                    gofirst_hits.append(solution)
-                    print("  gofirst hit %i" % len(gofirst_hits))
-                if is_place_fair(word):
-                    place_hits.append(solution)
-                    print("  place hit %i" % len(place_hits))
-                    flag = 1
-                if is_permutation_fair(word):
-                    permutation_hits.append(solution)
-                    print("  permutation hit %i" % len(permutation_hits))
-                if flag:
-                    break
-            if flag:
-                break
-        if flag:
-            break
-    if flag:
-        break
-
-
-end_time = time.time()
-
-print(end_time - start_time)
-
-gofirst_hits = []
-place_hits = []
-permutation_hits = []
-for solution in tqdm(solutions):
-    bits = (np.array(solution) > 0).astype(int)
-    array = bits_to_array(bits, m)
-    letters = string.ascii_lowercase[:n]
-    word = array_to_word(array, letters)
-    if is_gofirst_fair(word):
-        gofirst_hits.append(word)
-    if is_place_fair(word):
-        place_hits.append(word)
-    if is_permutation_fair(word):
-        permutation_hits.append(word)
-
-print(len(gofirst_hits))
-print(len(place_hits))
-print(len(permutation_hits))
-
-# ============================================================================
-
-
-n = 4
-m = 12
+m = 30
 
 vpool = IDPool()
 
@@ -181,274 +114,40 @@ for index, var_name in enumerate(sum(var_names, []), 1):
 var_dict = {v: vpool.id(v) for v in sum(var_names, [])}
 
 clauses = []
-# bounds = [
-#     m // 2,
-#     m * (3 * m + 2) // 12,
-#     m ** 2 * (m + 1) // 6,
-#     m * (5 * m ** 2 * (3 * m + 4) - 4) // 120,
-# ]
-# for i, bound in enumerate(bounds):
-#     for row in var_names[i:]:
-#         lits = [var_dict[x] for x in row]
-#         weights = [j ** i for j, x in enumerate(row, 1)]
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
+for i in range(2, n + 1):
+    clauses += build_grime_bounds_clauses(n - i, m, n, vpool)
+    clauses += build_gofirst_clauses(n - i, m, n, vpool)
 
-bound = m**n // n
-
-ys = [
-    add_indicator_variable("y_%i" % i, ["x_%i_%i" % (n - 2, i)], [0], vpool, clauses)
-    for i in range(m)
-]
-lits = [vpool.id("y_%i" % i) for i in range(m)] + [var_dict[x] for x in var_names[-1]]
-weights = [i ** (n - 1) for i in range(m)] + [(i + 1) ** (n - 1) for i in range(m)]
-cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-clauses += cnf.clauses
-
-lits = []
-weights = []
-for u, v in product([0, 1], repeat=2):
-    for i in range(m):
-        add_indicator_variable(
-            "x_%i%i_%i%i_%i" % (n - 3, n - 2, u, v, i),
-            ["x_%i_%i" % (n - 3, i), "x_%i_%i" % (n - 2, i)],
-            [u, v],
-            vpool,
-            clauses,
-        )
-    lits += [vpool.id("x_%i%i_%i%i_%i" % (n - 3, n - 2, u, v, i)) for i in range(m)]
-    # if (u, v) == (0, 0):
-    #     weights += [i ** (n - 2) * (i + 1) for i in range(m)]
-    # elif (u, v) == (0, 1):
-    #     weights += [i ** (n - 1) for i in range(m)]
-    # elif (u, v) == (1, 0):
-    #     weights += [(i + 1) ** (n - 1) for i in range(m)]
-    # elif (u, v) == (1, 1):
-    #     weights += [i * (i + 1) ** (n - 2) for i in range(m)]
-
-    if u == 0:
-        weights += [i ** (n - 2) * i**v * (i + 1) ** (1 - v) for i in range(m)]
-    else:
-        weights += [(i + 1) ** (n - 2) * i**v * (i + 1) ** (1 - v) for i in range(m)]
-
-cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-clauses += cnf.clauses
-
-lits = []
-weights = []
-for u, v, w in product([0, 1], repeat=3):
-    for i in range(m):
-        add_indicator_variable(
-            "x_%i%i%i_%i%i%i_%i" % (n - 4, n - 3, n - 2, u, v, w, i),
-            ["x_%i_%i" % (n - 4, i), "x_%i_%i" % (n - 3, i), "x_%i_%i" % (n - 2, i)],
-            [u, v, w],
-            vpool,
-            clauses,
-        )
-    lits += [
-        vpool.id("x_%i%i%i_%i%i%i_%i" % (n - 4, n - 3, n - 2, u, v, w, i))
-        for i in range(m)
-    ]
-    if u == 0:
-        weights += [
-            i ** (n - 3) * i ** (v + w) * (i + 1) ** (2 - (v + w)) for i in range(m)
-        ]
-    else:
-        weights += [
-            (i + 1) ** (n - 3) * i ** (v + w) * (i + 1) ** (2 - (v + w))
-            for i in range(m)
-        ]
-
-cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-clauses += cnf.clauses
-
-lits = []
-weights = []
-for u, v, w, x in product([0, 1], repeat=4):
-    for i in range(m):
-        add_indicator_variable(
-            "x_%i%i%i%i_%i%i%i%i_%i" % (n - 5, n - 4, n - 3, n - 2, u, v, w, x, i),
-            [
-                "x_%i_%i" % (n - 5, i),
-                "x_%i_%i" % (n - 4, i),
-                "x_%i_%i" % (n - 3, i),
-                "x_%i_%i" % (n - 2, i),
-            ],
-            [u, v, w, x],
-            vpool,
-            clauses,
-        )
-    lits += [
-        vpool.id("x_%i%i%i%i_%i%i%i%i_%i" % (n - 5, n - 4, n - 3, n - 2, u, v, w, x, i))
-        for i in range(m)
-    ]
-    if u == 0:
-        weights += [
-            i ** (n - 4) * i ** (v + w + x) * (i + 1) ** (3 - (v + w + x))
-            for i in range(m)
-        ]
-    else:
-        weights += [
-            (i + 1) ** (n - 4) * i ** (v + w + x) * (i + 1) ** (3 - (v + w + x))
-            for i in range(m)
-        ]
-
-cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-clauses += cnf.clauses
-
-# if n == 5:
-#     print("Adding extra clauses")
-#     row = var_names[0]
-#     lits = [var_dict[x] for x in row]
-#     weights = [j for j, x in enumerate(row, 1)]
-#     bound = 915
-#     cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#     clauses += cnf.clauses
-#
-#     for j, k in combinations([1, 2, 3], 2):
-#         for i in range(m):  # loop to build cardinality constraints for case 11
-#             x = vpool.id("x_%i_%i" % (j, i))
-#             y = vpool.id("x_%i_%i" % (k, i))
-#
-#             var_name = "x_%i%i_11_%i" % (j, k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[-x, -y, z], [x, -z], [y, -z]]  # (x & y) <-> z
-#
-#             var_name = "x_%i%i_00_%i" % (j, k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[x, y, z], [-x, -z], [-y, -z]]  # (-x & -y) <-> z
-#
-#             var_name = "x_%i%i_01_%i" % (j, k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[x, -y, z], [-x, -z], [y, -z]]  # (-x & y) <-> z
-#
-#             var_name = "x_%i%i_10_%i" % (j, k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[-x, y, z], [x, -z], [-y, -z]]  # (x & -y) <-> z
-#
-#         lits = [var_dict["x_%i%i_11_%i" % (j, k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 6
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_%i%i_00_%i" % (j, k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 6
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_%i%i_01_%i" % (j, k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 3
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_%i%i_10_%i" % (j, k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 3
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#     for k in [1, 2, 3]:
-#         for i in range(m):
-#             x = vpool.id("x_0_%i" % i)
-#             y = vpool.id("x_%i_%i" % (k, i))
-#
-#             var_name = "x_0%i_11_%i" % (k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[-x, -y, z], [x, -z], [y, -z]]  # (x & y) <-> z
-#
-#             var_name = "x_0%i_00_%i" % (k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[x, y, z], [-x, -z], [-y, -z]]  # (x & y) <-> z
-#
-#             var_name = "x_0%i_01_%i" % (k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[x, -y, z], [-x, -z], [y, -z]]  # (x & y) <-> z
-#
-#             var_name = "x_0%i_10_%i" % (k, i)
-#             vpool.id(var_name)
-#             var_dict[var_name] = vpool.id(var_name)
-#             z = vpool.id(var_name)
-#             clauses += [[-x, y, z], [x, -z], [-y, -z]]  # (x & y) <-> z
-#
-#         lits = [var_dict["x_0%i_11_%i" % (k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 4
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_0%i_00_%i" % (k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 4
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_0%i_01_%i" % (k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 4
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-#
-#         lits = [var_dict["x_0%i_10_%i" % (k, i)] for i in range(m)]
-#         weights = [1 for i in range(m)]
-#         bound = m // 4
-#         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
-#         clauses += cnf.clauses
-
+# cnf = pysat.formula.CNF(from_clauses(clauses))
+# cnf.to_file(filename)
 
 sat = Minicard()
 for clause in clauses:
     sat.add_clause(clause)
 
 start_time = time.time()
-
 solutions = []
 is_solvable = True
 while is_solvable:
-    if len(solutions) % 10000 == 0:
-        print("%i solutions discovered so far." % len(solutions))
     is_solvable = sat.solve()
     if is_solvable:
-        # print("Found a solution.")
         sat_solution = sat.get_model()[: m * (n - 1)]
+        print("Found a solution")
+        bits = (np.array(sat_solution) > 0).astype(int)
+        array = bits_to_array(bits, m)
+        letters = string.ascii_lowercase[:n]
+        word = array_to_word(array, letters)
+
+        print(is_gofirst_fair(word))
+        print(is_place_fair(word))
+        print(is_permutation_fair(word))
         solutions.append(sat_solution)
-
-        # bits = (np.array(sat_solution) > 0).astype(int)
-        # array = bits_to_array(bits, m)
-        # letters = string.ascii_lowercase[:n]
-        # word = array_to_word(array, letters)
-        # # if is_gofirst_fair(word): gofirst_hits.append(word)
-        # if is_place_fair(word):
-        #     print("Found a set of dice that is place fair.")
-        #     break
-        # # if is_permutation_fair(word): permutation_hits.append(word)
-
         elimination_clause = [-x for x in sat_solution]
         sat.add_clause(elimination_clause)
-
     else:
         print("Found %i solutions." % len(solutions))
-
 end_time = time.time()
-
 print(end_time - start_time)
-
 
 gofirst_hits = []
 place_hits = []
