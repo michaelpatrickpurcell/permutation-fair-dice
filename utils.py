@@ -582,3 +582,101 @@ def expand_to_lcm(s):
         t.append(x * (lcm // c[x]))
 
     return "".join(t)
+
+
+def milp_exhaust_insert(
+    word,
+    order_len,
+    solution_len=None,
+    upBound=None,
+    palindrome=False,
+    positions=None,
+    verbose=False,
+):
+    letters_list = list(word)
+    last_letter = sorted(list(set(letters_list)))[-1]
+    new_letter = chr(ord(last_letter) + 1)
+    letters = "".join(sorted(list(set(letters_list))) + [new_letter])
+    n = len(letters)
+    if positions:
+        all_positions = sorted(list(positions))
+    else:
+        all_positions = [i for i in range(len(word) + 1)]
+
+    if upBound is None:
+        b = solution_len + 1
+    else:
+        b = upBound + 1
+    l = len(all_positions)
+    weights = [b ** i for i in range(l)]
+
+    all_orders = list(permutations(letters, n))
+    short_orders = list(permutations(letters, order_len))
+
+    counts = []
+    for i in tqdm(all_positions, disable=~verbose):
+        temp = list(word)
+        temp.insert(i, new_letter)
+        counts.append(score_orders2(temp, n))
+
+    xs = []
+    for i in tqdm(all_positions, disable=~verbose):
+        if upBound:
+            xs.append(
+                pulp.LpVariable("x%i" % i, lowBound=0, upBound=upBound, cat="Integer")
+            )
+        else:
+            xs.append(pulp.LpVariable("x%i" % i, lowBound=0, cat="Integer"))
+
+    m = len(word) // (n - 1)
+    if solution_len is None:
+        solution_len = m
+
+    # target = ((m**n) // factorial(n, exact=True)) * factorial(n-order_len, exact=True) * comb(n, n-order_len, exact=True)
+    # target = (m**n) // factorial(order_len, exact=True)
+    target = (
+        comb(n, n - order_len, exact=True)
+        * factorial(n - order_len, exact=True)
+        * np.mean(list(counts[0].values()))
+        * solution_len
+    )
+
+    prob = pulp.LpProblem("myProblem", pulp.LpMinimize)
+    prob += pulp.lpDot(xs, weights)
+    prob += pulp.lpSum(xs) == solution_len
+
+    for short_order in tqdm(short_orders, disable=~verbose):
+        temp = []
+        for order in tqdm(all_orders, disable=~verbose):
+            temp_order = tuple([x for x in order if x in short_order])
+            if short_order == temp_order:
+                temp += [x * ct[order] for x, ct in zip(xs, counts)]
+        prob += pulp.lpSum(temp) == target
+
+    if palindrome:
+        for x, y in zip(xs, xs[::-1]):
+            prob += x == y
+
+    hits = []
+    previous_solution = None
+    status = 1
+    while status != -1:
+        status = prob.solve(pulp.PULP_CBC_CMD(msg=int(verbose)))
+        if status == -1:
+            continue
+        else:
+            solution = [pulp.value(x) for x in xs]
+            if solution == previous_solution:
+                threshold += 1
+            else:
+                print(solution)
+                hit = list(word)
+                for i, mult in zip(all_positions[::-1], solution[::-1]):
+                    hit.insert(i, "".join(int(mult) * [new_letter]))
+                hits.append("".join(hit))
+                threshold = np.dot(solution, weights)
+                previous_solution = solution
+
+            prob += pulp.lpDot(xs, weights) >= threshold + 1
+
+    return hits
