@@ -107,18 +107,19 @@ m = 30
 vpool = IDPool()
 
 var_names = [["x_%i_%i" % (i, j) for j in range(m)] for i in range(n - 1)]
-var_dict = dict()
 for index, var_name in enumerate(sum(var_names, []), 1):
     vpool.id(var_name)
 
-var_dict = {v: vpool.id(v) for v in sum(var_names, [])}
-
 clauses = []
+print("Top VarID: {0}".format(vpool.top))
+print("Total Clauses: {0}\n".format(len(clauses)))
 for i in range(2, n + 1):
     clauses += build_grime_bounds_clauses(n - i, m, n, vpool)
     clauses += build_gofirst_clauses(n - i, m, n, vpool)
+    print("Top VarID: {0}".format(vpool.top))
+    print("Total Clauses: {0}\n".format(len(clauses)))
 
-# cnf = pysat.formula.CNF(from_clauses(clauses))
+# cnf = pysat.formula.CNF(from_clauses=clauses)
 # cnf.to_file(filename)
 
 sat = Minicard()
@@ -132,15 +133,16 @@ while is_solvable:
     is_solvable = sat.solve()
     if is_solvable:
         sat_solution = sat.get_model()[: m * (n - 1)]
-        print("Found a solution")
-        bits = (np.array(sat_solution) > 0).astype(int)
-        array = bits_to_array(bits, m)
-        letters = string.ascii_lowercase[:n]
-        word = array_to_word(array, letters)
 
-        print(is_gofirst_fair(word))
-        print(is_place_fair(word))
-        print(is_permutation_fair(word))
+        # print("Found a solution")
+        # bits = (np.array(sat_solution) > 0).astype(int)
+        # array = bits_to_array(bits, m)
+        # letters = string.ascii_lowercase[:n]
+        # word = array_to_word(array, letters)
+        # print(is_gofirst_fair(word))
+        # print(is_place_fair(word))
+        # print(is_permutation_fair(word))
+
         solutions.append(sat_solution)
         elimination_clause = [-x for x in sat_solution]
         sat.add_clause(elimination_clause)
