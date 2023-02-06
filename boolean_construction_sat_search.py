@@ -39,8 +39,8 @@ def build_grime_bounds_clauses(i, m, n, vpool):
     grime_bounds = [
         m // 2,
         m * (3 * m + 2) // 12,
-        m**2 * (m + 1) // 6,
-        m * (5 * m**2 * (3 * m + 4) - 4) // 120,
+        m ** 2 * (m + 1) // 6,
+        m * (5 * m ** 2 * (3 * m + 4) - 4) // 120,
     ]
     print(grime_bounds)
     row = ["x_%i_%i" % (i, j) for j in range(m)]
@@ -48,7 +48,7 @@ def build_grime_bounds_clauses(i, m, n, vpool):
     for k, bound in enumerate(grime_bounds[: (i + 1)]):
         # lits = [var_dict[x] for x in row]
         lits = [vpool.id(x) for x in row]
-        weights = [j**k for j, x in enumerate(row, 1)]
+        weights = [j ** k for j, x in enumerate(row, 1)]
         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
         grime_bounds_clauses += cnf.clauses
 
@@ -135,7 +135,7 @@ def build_gofirst_clauses(i, m, n, vpool):
     if n > 5:
         raise ValueError()
 
-    gofirst_bound = m**n // n
+    gofirst_bound = m ** n // n
 
     lits = []
     weights = []
@@ -158,11 +158,11 @@ def build_gofirst_clauses(i, m, n, vpool):
         v = sum(bits[1:])
         if u == 0:
             weights += [
-                j ** (i + 1) * j**v * (j + 1) ** (((n - i) - 2) - v) for j in range(m)
+                j ** (i + 1) * j ** v * (j + 1) ** (((n - i) - 2) - v) for j in range(m)
             ]
         else:
             weights += [
-                (j + 1) ** (i + 1) * j**v * (j + 1) ** (((n - i) - 2) - v)
+                (j + 1) ** (i + 1) * j ** v * (j + 1) ** (((n - i) - 2) - v)
                 for j in range(m)
             ]
 
@@ -174,8 +174,8 @@ def build_gofirst_clauses(i, m, n, vpool):
 
 # ============================================================================
 
-n = 5
-m = 60
+n = 4
+m = 12
 
 vpool = IDPool()
 
