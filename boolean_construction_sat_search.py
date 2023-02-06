@@ -42,6 +42,7 @@ def build_grime_bounds_clauses(i, m, n, vpool):
         m**2 * (m + 1) // 6,
         m * (5 * m**2 * (3 * m + 4) - 4) // 120,
     ]
+    print(grime_bounds)
     row = ["x_%i_%i" % (i, j) for j in range(m)]
     grime_bounds_clauses = []
     for k, bound in enumerate(grime_bounds[: (i + 1)]):
@@ -51,7 +52,80 @@ def build_grime_bounds_clauses(i, m, n, vpool):
         cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
         grime_bounds_clauses += cnf.clauses
 
+    if i == 0 and n == 5:
+        extra_bound = m * (m + 1) // 4
+        print(extra_bound)
+        lits = [vpool.id(x) for x in row]
+        weights = [j for j, x in enumerate(row, 1)]
+        cnf = PBEnc.equals(lits=lits, weights=weights, bound=bound, vpool=vpool)
+        grime_bounds_clauses += cnf.clauses
+
     return grime_bounds_clauses
+
+
+# ============================================================================
+
+
+def build_column_constraint_clauses(i, m, n, vpool):
+    if n > 5:
+        raise ValueError()
+    column_constraint_clauses = []
+    if 0 < i < n - 1:
+        for k in range(i + 1, n - 1):
+            for bits in product([0, 1], repeat=2):
+                if bits[0] == bits[1]:
+                    column_constraint_bound = m // 6
+                else:
+                    column_constraint_bound = m // 3
+                for j in range(m):
+                    add_indicator_variable(
+                        "y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)),
+                        ["x_%i_%i" % (i, j), "x_%i_%i" % (k, j)],
+                        bits,
+                        vpool,
+                        clauses,
+                    )
+                lits = [
+                    vpool.id("y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)))
+                    for j in range(m)
+                ]
+                weights = [1 for j in range(1, m + 1)]
+                cnf = PBEnc.equals(
+                    lits=lits,
+                    weights=weights,
+                    bound=column_constraint_bound,
+                    vpool=vpool,
+                )
+                column_constraint_clauses += cnf.clauses
+    if i == 0 and n == 5:
+        for k in range(i + 1, n - 1):
+            for bits in product([0, 1], repeat=2):
+                if bits[0] == bits[1]:
+                    column_constraint_bound = m // 4
+                else:
+                    column_constraint_bound = m // 4
+                for j in range(m):
+                    add_indicator_variable(
+                        "y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)),
+                        ["x_%i_%i" % (i, j), "x_%i_%i" % (k, j)],
+                        bits,
+                        vpool,
+                        clauses,
+                    )
+                lits = [
+                    vpool.id("y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)))
+                    for j in range(m)
+                ]
+                weights = [1 for j in range(1, m + 1)]
+                cnf = PBEnc.equals(
+                    lits=lits,
+                    weights=weights,
+                    bound=column_constraint_bound,
+                    vpool=vpool,
+                )
+                column_constraint_clauses += cnf.clauses
+
+    return column_constraint_clauses
 
 
 # ============================================================================
@@ -71,7 +145,6 @@ def build_gofirst_clauses(i, m, n, vpool):
         for j in range(m):
             add_indicator_variable(
                 "y_%i_%s_%i" % ((i,) + (str(bits),) + (j,)),
-                # ["x_%i_%i" % (i, j), "x_%i_%i" % (i + 1, j)],
                 ["x_%i_%i" % (i + k, j) for k in range(reps)],
                 bits,
                 vpool,
@@ -102,7 +175,7 @@ def build_gofirst_clauses(i, m, n, vpool):
 # ============================================================================
 
 n = 5
-m = 30
+m = 60
 
 vpool = IDPool()
 
@@ -115,7 +188,9 @@ print("Top VarID: {0}".format(vpool.top))
 print("Total Clauses: {0}\n".format(len(clauses)))
 for i in range(2, n + 1):
     clauses += build_grime_bounds_clauses(n - i, m, n, vpool)
-    clauses += build_gofirst_clauses(n - i, m, n, vpool)
+    # if i > 2:
+    #     clauses += build_gofirst_clauses(n - i, m, n, vpool)
+    clauses += build_column_constraint_clauses(n - i, m, n, vpool)
     print("Top VarID: {0}".format(vpool.top))
     print("Total Clauses: {0}\n".format(len(clauses)))
 
